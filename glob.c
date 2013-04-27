@@ -1,4 +1,4 @@
-/* 
+/*
  *  globals params
  *
  *  在 params 中的 "*" 匹配正则表达式 ".*"
@@ -23,11 +23,11 @@
 
 #define	STRSIZ _POSIX_ARG_MAX
 static char ab[STRSIZ];	/* 生成的字符串的存储空间 */
-static char *string;	
+static char *string;
 static char *ava[STRSIZ/2];	/* 生成的参数列表 */
 static char **av;
 static int  ncoll;
-static jmp_buf env; 
+static jmp_buf env;
 
 int glob(int argc, char *argv[]);
 extern int texec(char* f, char **t);
@@ -55,7 +55,7 @@ int glob(int argc, char *argv[])
 
 	if (setjmp(env) != 0)
 		return 1;
-	while (--argc >= 2) 
+	while (--argc >= 2)
 		expand(*++argv);  /* 展开余下的所有的参数 */
 	return texec(ava[0], ava);
 }
@@ -63,7 +63,7 @@ int glob(int argc, char *argv[])
 void expand(char *as)
 {
 	register char *s, *cs;
-	struct dirent * dirp; 
+	struct dirent * dirp;
 	DIR	*dp;
 	char **oav;
 
@@ -73,7 +73,7 @@ void expand(char *as)
 	while (*cs!='*' && *cs!='?' && *cs!='[') {
 		if (*cs++ == 0) { /* 没有找到通配符 */
 			*av++ = cat(s, "");
-			return; 
+			return;
 		}
 	}
 	for (;;) {
@@ -161,16 +161,15 @@ int amatch(char *as, char *ap)
 		lc = INT_MAX;
 		while ((cc = *p++) != 0) {
 			if (cc==']') {
-				if ((ok && !neg) || (!ok && neg)) 
+				if ((ok && !neg) || (!ok && neg))
 					return amatch(s, p); /* 如果匹配，继续比较后面的字符 */
 				else
 					return 0;
 			} else if (cc=='-') {
 				if (lc<=scc && scc<=(c = *p++)) /* 在范围内 */
 					ok++;
-			} else
-				if (scc == (lc=cc))
-					ok++;
+			} else if (scc == (lc=cc))
+				ok++;
 		}
 		return 0;
 
@@ -193,9 +192,9 @@ int amatch(char *as, char *ap)
 /* 对闭包的匹配 */
 int umatch(char *s, char *p)
 {
-	if(*p==0) /* 模式以 * 结束 */
+	if (*p==0) /* 模式以 * 结束 */
 		return 1;
-	while(*s) /* 文件名中有字符匹配模式中 * 后面的字符 */
+	while (*s) /* 文件名中有字符匹配模式中 * 后面的字符 */
 		if (amatch(s++,p))
 			return 1;
 	return 0;
@@ -226,7 +225,7 @@ char* cat(char *as1, char *as2)
 			toolong();
 		c &= ~QUOTE; /* 清除引用位 */
 		if (c==0) { /* 原先是路径分隔符 */
-			*s2++ = '/'; 
+			*s2++ = '/';
 			break;
 		}
 		*s2++ = c;

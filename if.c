@@ -47,7 +47,7 @@ int main(int argc, char**argv)
 		return 1;
 	if (expr())
 		return doex(0);
-	else	
+	else
 		return 1;
 }
 /*
@@ -57,13 +57,13 @@ int main(int argc, char**argv)
 char *nxtarg(int mt)
 {
 	if (ap>=ac) {
-		if(mt) {
+		if (mt) {
 			ap++;
-			return(0);
+			return (0);
 		}
 		synbad("argument exprected","");
 	}
-	return(av[ap++]);
+	return (av[ap++]);
 }
 /*
  * expr ::= * e1 -o expr | expr
@@ -74,9 +74,9 @@ int expr(void)
 
 	p1 = e1();
 	if (EQ(nxtarg(1), "-o"))
-		return(p1 | expr());
+		return (p1 | expr());
 	ap--;
-	return(p1);
+	return (p1);
 }
 /*
  * e1 ::= e2 -a e1 | e1
@@ -89,7 +89,7 @@ int e1(void)
 	if (EQ(nxtarg(1), "-a"))
 		return (p1 & e1());
 	ap--;
-	return(p1);
+	return (p1);
 }
 /*
  * e2 ::= e3 | ! e3
@@ -97,9 +97,9 @@ int e1(void)
 int e2(void)
 {
 	if (EQ(nxtarg(0), "!"))
-		return(!e3());
+		return (!e3());
 	ap--;
-	return(e3());
+	return (e3());
 }
 /*
  * e3 ::= ( expr ) | { command ... } | -op file | string -op string
@@ -113,72 +113,72 @@ int e3(void)
 	int ccode;
 
 	a=nxtarg(0);
-	if(EQ(a, "(")) {
+	if (EQ(a, "(")) {
 		p1 = expr();
-		if(!EQ(nxtarg(0), ")")) 
+		if (!EQ(nxtarg(0), ")"))
 			synbad(") exprected","");
-		return(p1);
+		return (p1);
 	}
-	if(EQ(a, "{")) { /* 执行一个命令并等待退出状态 */
-		if(fork()) /* 父进程执行部分 */ 
+	if (EQ(a, "{")) { /* 执行一个命令并等待退出状态 */
+		if (fork()) /* 父进程执行部分 */
 			wait(&ccode);
 		else { /* 子进程执行部分 */
-			if ((r=doex("}")) != 0 && r == 255) 
+			if ((r=doex("}")) != 0 && r == 255)
 				synbad("} exprected","");
 			else
 				exit(r);
 		}
-		while((a=nxtarg(0)) && (!EQ(a,"}")));
-		return(ccode? 0 : 1);
+		while ((a=nxtarg(0)) && (!EQ(a,"}")));
+		return (ccode? 0 : 1);
 	}
-	if(EQ(a, "-r"))
-		return(tio(nxtarg(0), 0));
-	if(EQ(a, "-w"))
-		return(tio(nxtarg(0), 1));
-	if(EQ(a, "-d"))
-		return(ftype(nxtarg(0))==DIR);
-	if(EQ(a, "-f"))
-		return(ftype(nxtarg(0))==FIL);
-	if(EQ(a, "-s"))
-		return(fsizep(nxtarg(0)));
-	if(EQ(a, "-t")) {
-		if(ap>=ac)
-			return(isatty(STDOUT_FILENO));
+	if (EQ(a, "-r"))
+		return (tio(nxtarg(0), 0));
+	if (EQ(a, "-w"))
+		return (tio(nxtarg(0), 1));
+	if (EQ(a, "-d"))
+		return (ftype(nxtarg(0))==DIR);
+	if (EQ(a, "-f"))
+		return (ftype(nxtarg(0))==FIL);
+	if (EQ(a, "-s"))
+		return (fsizep(nxtarg(0)));
+	if (EQ(a, "-t")) {
+		if (ap>=ac)
+			return (isatty(STDOUT_FILENO));
 		else
-			return(isatty(atoi(nxtarg(0))));
+			return (isatty(atoi(nxtarg(0))));
 	}
-	if(EQ(a, "-n"))
-		return(!EQ(nxtarg(0), ""));
-	if(EQ(a, "-z"))
-		return(EQ(nxtarg(0), ""));
+	if (EQ(a, "-n"))
+		return (!EQ(nxtarg(0), ""));
+	if (EQ(a, "-z"))
+		return (EQ(nxtarg(0), ""));
 
 	p2 = nxtarg(1);
 	if (p2==NULL)
-		return(!EQ(a,""));
-	if(EQ(p2, "="))
-		return(EQ(nxtarg(0), a));
-	if(EQ(p2, "!="))
-		return(!EQ(nxtarg(0), a));
-	if(EQ(a, "-l")) {
+		return (!EQ(a,""));
+	if (EQ(p2, "="))
+		return (EQ(nxtarg(0), a));
+	if (EQ(p2, "!="))
+		return (!EQ(nxtarg(0), a));
+	if (EQ(a, "-l")) {
 		int1=strlen(p2);
 		p2=nxtarg(0);
-	} else{
+	} else {
 		int1=atoi(a);
 	}
 
 	int2 = atoi(nxtarg(0));
-	if(EQ(p2, "-eq"))
-		return(int1==int2);
-	if(EQ(p2, "-ne"))
-		return(int1!=int2);
-	if(EQ(p2, "-gt"))
-		return(int1>int2);
-	if(EQ(p2, "-lt"))
-		return(int1<int2);
-	if(EQ(p2, "-ge"))
-		return(int1>=int2);
-	if(EQ(p2, "-le"))
-		return(int1<=int2);
+	if (EQ(p2, "-eq"))
+		return (int1==int2);
+	if (EQ(p2, "-ne"))
+		return (int1!=int2);
+	if (EQ(p2, "-gt"))
+		return (int1>int2);
+	if (EQ(p2, "-lt"))
+		return (int1<int2);
+	if (EQ(p2, "-ge"))
+		return (int1>=int2);
+	if (EQ(p2, "-le"))
+		return (int1<=int2);
 
 	synbad("unknown operator ",p2);
 	return 0;
@@ -192,9 +192,9 @@ int tio(char *a, int  f)
 	f = open(a, f);
 	if (f>=0) {
 		close(f);
-		return(1);
+		return (1);
 	}
-	return(0);
+	return (0);
 }
 /*
  * 文件类型测试
@@ -203,11 +203,11 @@ int ftype(char *f)
 {
 	struct stat statb;
 
-	if(stat(f,&statb)<0)
-		return(0);
-	if((statb.st_mode&S_IFMT)==S_IFDIR)
-		return(DIR);
-	return(FIL);
+	if (stat(f,&statb)<0)
+		return (0);
+	if ((statb.st_mode&S_IFMT)==S_IFDIR)
+		return (DIR);
+	return (FIL);
 }
 /*
  * 文件大小测试
@@ -215,9 +215,9 @@ int ftype(char *f)
 int fsizep(char *f)
 {
 	struct stat statb;
-	if(stat(f,&statb)<0)
-		return(0);
-	return(statb.st_size>0);
+	if (stat(f,&statb)<0)
+		return (0);
+	return (statb.st_size>0);
 }
 /*
  * 打印错误信息并退出

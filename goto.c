@@ -34,7 +34,7 @@ int getlin(char *s)
 
 	nchar=0;
 	while ((ch=nextc())!='\0' && ch!=':') {
-		while(ch!='\n' && ch!='\0')
+		while (ch!='\n' && ch!='\0')
 			ch = nextc();
 	}
 	if (ch=='\0')
@@ -44,7 +44,7 @@ int getlin(char *s)
 		s[i++] = ch;
 		ch = nextc();
 	}
-	while(ch != '\n')
+	while (ch != '\n')
 		ch = nextc();
 	s[i] = '\0';
 	return 0;
@@ -54,11 +54,11 @@ int nextc(void)
 {
 	char cc;
 	offset++;
-	
+
 	if (nchar++ >= _POSIX_MAX_INPUT)
 		write(STDOUT_FILENO, "line overflow\n", 14);
 
-	if(read(STDIN_FILENO, &cc, 1))
+	if (read(STDIN_FILENO, &cc, 1))
 		return cc;
 	else
 		return 0;

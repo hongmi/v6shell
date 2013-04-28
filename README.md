@@ -7,7 +7,7 @@ V6 Thompson Shell
 links ref
 
 
-[[http://coolshell.cn/articles/9410.html#more-9410]]
-[[http://blog.chinaunix.net/uid-20106293-id-142129.html]]
+[1] http://coolshell.cn/articles/9410.html#more-9410  
+[2] http://blog.chinaunix.net/uid-20106293-id-142129.html
 
 

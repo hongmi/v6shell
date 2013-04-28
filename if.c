@@ -1,7 +1,7 @@
-/*
+ï»¿/*
  * if exprression cmd [arg]....
- * if ÊÇ test ÃüÁîµÄÇ°Éí¡£ÔÚ²âÊÔÍê±í´ïÊ½Ö®ºó£¬Èç¹ûÎªÕæÔòÖ´ĞĞºóÃæµÄÃüÁî¡£
- * ÕâÀïµÄ if ÃüÁî½¨Á¢ÔÚ v7 test ÃüÁî»ù´¡ÉÏ¡£
+ * if æ˜¯ test å‘½ä»¤çš„å‰èº«ã€‚åœ¨æµ‹è¯•å®Œè¡¨è¾¾å¼ä¹‹åï¼Œå¦‚æœä¸ºçœŸåˆ™æ‰§è¡Œåé¢çš„å‘½ä»¤ã€‚
+ * è¿™é‡Œçš„ if å‘½ä»¤å»ºç«‹åœ¨ v7 test å‘½ä»¤åŸºç¡€ä¸Šã€‚
  */
 
 #include <stdlib.h>
@@ -47,23 +47,23 @@ int main(int argc, char**argv)
 		return 1;
 	if (expr())
 		return doex(0);
-	else
+	else	
 		return 1;
 }
 /*
- * »ñµÃÏÂÒ»¸ö²ÎÊı¡£mt Ö¸Ê¾ÔÚ¶Áµ½ÁĞ±íÎ²²¿µÄÊ±ºòÊÇ·ñÎªÓï·¨´íÎó£¬
- * 1 ·µ»Ø¿ÕÖ¸Õë£¬0 ÌáÊ¾´íÎó²¢ÍË³ö¡£
+ * è·å¾—ä¸‹ä¸€ä¸ªå‚æ•°ã€‚mt æŒ‡ç¤ºåœ¨è¯»åˆ°åˆ—è¡¨å°¾éƒ¨çš„æ—¶å€™æ˜¯å¦ä¸ºè¯­æ³•é”™è¯¯ï¼Œ
+ * 1 è¿”å›ç©ºæŒ‡é’ˆï¼Œ0 æç¤ºé”™è¯¯å¹¶é€€å‡ºã€‚
  */
 char *nxtarg(int mt)
 {
 	if (ap>=ac) {
-		if (mt) {
+		if(mt) {
 			ap++;
-			return (0);
+			return(0);
 		}
 		synbad("argument exprected","");
 	}
-	return (av[ap++]);
+	return(av[ap++]);
 }
 /*
  * expr ::= * e1 -o expr | expr
@@ -74,9 +74,9 @@ int expr(void)
 
 	p1 = e1();
 	if (EQ(nxtarg(1), "-o"))
-		return (p1 | expr());
+		return(p1 | expr());
 	ap--;
-	return (p1);
+	return(p1);
 }
 /*
  * e1 ::= e2 -a e1 | e1
@@ -89,7 +89,7 @@ int e1(void)
 	if (EQ(nxtarg(1), "-a"))
 		return (p1 & e1());
 	ap--;
-	return (p1);
+	return(p1);
 }
 /*
  * e2 ::= e3 | ! e3
@@ -97,9 +97,9 @@ int e1(void)
 int e2(void)
 {
 	if (EQ(nxtarg(0), "!"))
-		return (!e3());
+		return(!e3());
 	ap--;
-	return (e3());
+	return(e3());
 }
 /*
  * e3 ::= ( expr ) | { command ... } | -op file | string -op string
@@ -113,78 +113,78 @@ int e3(void)
 	int ccode;
 
 	a=nxtarg(0);
-	if (EQ(a, "(")) {
+	if(EQ(a, "(")) {
 		p1 = expr();
-		if (!EQ(nxtarg(0), ")"))
+		if(!EQ(nxtarg(0), ")")) 
 			synbad(") exprected","");
-		return (p1);
+		return(p1);
 	}
-	if (EQ(a, "{")) { /* Ö´ĞĞÒ»¸öÃüÁî²¢µÈ´ıÍË³ö×´Ì¬ */
-		if (fork()) /* ¸¸½ø³ÌÖ´ĞĞ²¿·Ö */
+	if(EQ(a, "{")) { /* æ‰§è¡Œä¸€ä¸ªå‘½ä»¤å¹¶ç­‰å¾…é€€å‡ºçŠ¶æ€ */
+		if(fork()) /* çˆ¶è¿›ç¨‹æ‰§è¡Œéƒ¨åˆ† */ 
 			wait(&ccode);
-		else { /* ×Ó½ø³ÌÖ´ĞĞ²¿·Ö */
-			if ((r=doex("}")) != 0 && r == 255)
+		else { /* å­è¿›ç¨‹æ‰§è¡Œéƒ¨åˆ† */
+			if ((r=doex("}")) != 0 && r == 255) 
 				synbad("} exprected","");
 			else
 				exit(r);
 		}
-		while ((a=nxtarg(0)) && (!EQ(a,"}")));
-		return (ccode? 0 : 1);
+		while((a=nxtarg(0)) && (!EQ(a,"}")));
+		return(ccode? 0 : 1);
 	}
-	if (EQ(a, "-r"))
-		return (tio(nxtarg(0), 0));
-	if (EQ(a, "-w"))
-		return (tio(nxtarg(0), 1));
-	if (EQ(a, "-d"))
-		return (ftype(nxtarg(0))==DIR);
-	if (EQ(a, "-f"))
-		return (ftype(nxtarg(0))==FIL);
-	if (EQ(a, "-s"))
-		return (fsizep(nxtarg(0)));
-	if (EQ(a, "-t")) {
-		if (ap>=ac)
-			return (isatty(STDOUT_FILENO));
+	if(EQ(a, "-r"))
+		return(tio(nxtarg(0), 0));
+	if(EQ(a, "-w"))
+		return(tio(nxtarg(0), 1));
+	if(EQ(a, "-d"))
+		return(ftype(nxtarg(0))==DIR);
+	if(EQ(a, "-f"))
+		return(ftype(nxtarg(0))==FIL);
+	if(EQ(a, "-s"))
+		return(fsizep(nxtarg(0)));
+	if(EQ(a, "-t")) {
+		if(ap>=ac)
+			return(isatty(STDOUT_FILENO));
 		else
-			return (isatty(atoi(nxtarg(0))));
+			return(isatty(atoi(nxtarg(0))));
 	}
-	if (EQ(a, "-n"))
-		return (!EQ(nxtarg(0), ""));
-	if (EQ(a, "-z"))
-		return (EQ(nxtarg(0), ""));
+	if(EQ(a, "-n"))
+		return(!EQ(nxtarg(0), ""));
+	if(EQ(a, "-z"))
+		return(EQ(nxtarg(0), ""));
 
 	p2 = nxtarg(1);
 	if (p2==NULL)
-		return (!EQ(a,""));
-	if (EQ(p2, "="))
-		return (EQ(nxtarg(0), a));
-	if (EQ(p2, "!="))
-		return (!EQ(nxtarg(0), a));
-	if (EQ(a, "-l")) {
+		return(!EQ(a,""));
+	if(EQ(p2, "="))
+		return(EQ(nxtarg(0), a));
+	if(EQ(p2, "!="))
+		return(!EQ(nxtarg(0), a));
+	if(EQ(a, "-l")) {
 		int1=strlen(p2);
 		p2=nxtarg(0);
-	} else {
+	} else{
 		int1=atoi(a);
 	}
 
 	int2 = atoi(nxtarg(0));
-	if (EQ(p2, "-eq"))
-		return (int1==int2);
-	if (EQ(p2, "-ne"))
-		return (int1!=int2);
-	if (EQ(p2, "-gt"))
-		return (int1>int2);
-	if (EQ(p2, "-lt"))
-		return (int1<int2);
-	if (EQ(p2, "-ge"))
-		return (int1>=int2);
-	if (EQ(p2, "-le"))
-		return (int1<=int2);
+	if(EQ(p2, "-eq"))
+		return(int1==int2);
+	if(EQ(p2, "-ne"))
+		return(int1!=int2);
+	if(EQ(p2, "-gt"))
+		return(int1>int2);
+	if(EQ(p2, "-lt"))
+		return(int1<int2);
+	if(EQ(p2, "-ge"))
+		return(int1>=int2);
+	if(EQ(p2, "-le"))
+		return(int1<=int2);
 
 	synbad("unknown operator ",p2);
 	return 0;
 }
 /*
- * ÎÄ¼ş·ÃÎÊ²âÊÔ
+ * æ–‡ä»¶è®¿é—®æµ‹è¯•
  */
 int tio(char *a, int  f)
 {
@@ -192,35 +192,35 @@ int tio(char *a, int  f)
 	f = open(a, f);
 	if (f>=0) {
 		close(f);
-		return (1);
+		return(1);
 	}
-	return (0);
+	return(0);
 }
 /*
- * ÎÄ¼şÀàĞÍ²âÊÔ
+ * æ–‡ä»¶ç±»å‹æµ‹è¯•
  */
 int ftype(char *f)
 {
 	struct stat statb;
 
-	if (stat(f,&statb)<0)
-		return (0);
-	if ((statb.st_mode&S_IFMT)==S_IFDIR)
-		return (DIR);
-	return (FIL);
+	if(stat(f,&statb)<0)
+		return(0);
+	if((statb.st_mode&S_IFMT)==S_IFDIR)
+		return(DIR);
+	return(FIL);
 }
 /*
- * ÎÄ¼ş´óĞ¡²âÊÔ
+ * æ–‡ä»¶å¤§å°æµ‹è¯•
  */
 int fsizep(char *f)
 {
 	struct stat statb;
-	if (stat(f,&statb)<0)
-		return (0);
-	return (statb.st_size>0);
+	if(stat(f,&statb)<0)
+		return(0);
+	return(statb.st_size>0);
 }
 /*
- * ´òÓ¡´íÎóĞÅÏ¢²¢ÍË³ö
+ * æ‰“å°é”™è¯¯ä¿¡æ¯å¹¶é€€å‡º
  */
 void synbad(char *s1, char *s2)
 {
@@ -231,8 +231,8 @@ void synbad(char *s1, char *s2)
 	longjmp(env,1);
 }
 /*
- * Ö´ĞĞÃüÁî
- * earg ÊÇÖÕÖ¹²ÎÊı
+ * æ‰§è¡Œå‘½ä»¤
+ * earg æ˜¯ç»ˆæ­¢å‚æ•°
  */
 int doex(char *earg)
 {

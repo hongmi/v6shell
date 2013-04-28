@@ -1,42 +1,46 @@
-/*
- * Õâ¸ö shell ÊÇ UNIX v6 µÄ sh ÔÚ POSIX »·¾³ÏÂµÄÖØĞÂÊµÏÖ¡£
- * UNIX v6 ÊÇÊÜ BSD Ğí¿ÉÖ¤±£»¤µÄ×ÔÓÉÈí¼ş£¬ÆäÖĞ sh µÄÔ­×÷ÕßÊÇ Ken Thompson¡£
+ï»¿/*
+ * è¿™ä¸ª shell æ˜¯ UNIX v6 çš„ sh åœ¨ POSIX ç¯å¢ƒä¸‹çš„é‡æ–°å®ç°ã€‚
+ * UNIX v6 æ˜¯å— BSD è®¸å¯è¯ä¿æŠ¤çš„è‡ªç”±è½¯ä»¶ï¼Œå…¶ä¸­ sh çš„åŸä½œè€…æ˜¯ Ken Thompsonã€‚
+ * ä½™å¯¹è¿™ä¸ª shell çš„è¯­æ³•åšäº†ç»†èŠ‚ä¿®æ”¹ï¼Œå¯¹ä»£ç åšäº†é‡å†™å’Œæ³¨é‡Šã€‚
+ * ä½™å¯¹è¿™ä¸ªç¨‹åºå’Œç›¸å…³æ–‡æ¡£ä¸åšä»»ä½•æ‹…ä¿ï¼Œæ”¾å¼ƒä¸€åˆ‡æƒåˆ©ï¼Œä¸æ‰¿æ‹…ä»»ä½•è´£ä»»å’Œä¹‰åŠ¡ã€‚
  *
- * Ö÷ÒªĞŞ¸ÄÓĞ: K&R C -> ANSI C£¬unix v6/v7 -> POSIX£¬È¥µôÁË½ø³Ì¼ÇÕÊºÍ ^£¬
- * Ôö¼ÓÁË $?¡¢umask ºÍ exec£¬È¥³ıÁË goto Óï¾ä£¬Ôö¼ÓÁËÖĞÎÄ×¢ÊÍ¡£
+ * æœ€è¿‘ä¿®è®¢: 2006-07-13   å¯’è‰é€€å£«(http://mhss.cublog.cn)
+ * åšçš„å·¥ä½œä¸»è¦æœ‰: K&R C -> ANSI Cï¼Œunix v6/v7 -> POSIXï¼Œå»æ‰äº†è¿›ç¨‹è®°å¸å’Œ ^ï¼Œ
+ * å¢åŠ äº† $?ã€umask å’Œ execï¼Œå»é™¤äº† goto è¯­å¥ï¼Œå¢åŠ äº†ä¸­æ–‡æ³¨é‡Šã€‚
+ * ä¸Šæ¬¡ä¿®è®¢: 2004-09-06
  */
 
 /*
- * Copyright(C) Caldera International Inc. 2001-2002. All rights reserved.
+ * Copyright(C) Caldera International Inc. 2001-2002. All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * are permitted provided that the following conditions are met: 
  *
  *     Redistributions of source code and documentation must retain the above
  *     copyright notice, this list of conditions and the following disclaimer.
- *     Redistributions in binary form must reproduce the above copyright notice,
+ *     Redistributions in binary form must reproduce the above copyright notice, 
  *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
+ *     and/or other materials provided with the distribution. 
  *
  *     All advertising materials mentioning features or use of this software
- *     must display the following acknowledgement:
+ *     must display the following acknowledgement: 
  *
- *     This product includes software developed or owned by Caldera International, Inc.
+ *     This product includes software developed or owned by Caldera International, Inc. 
  *
  *     Neither the name of Caldera International, Inc. nor the names of other
  *     contributors may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
- *
- * USE OF THE SOFTWARE PROVIDED FOR UNDER THIS LICENSE BY CALDERA INTERNATIONAL, INC.
- * AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL CALDERA INTERNATIONAL, INC. BE LIABLE FOR
- * ANY DIRECT, INDIRECT INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ *     software without specific prior written permission. 
+ * 
+ * USE OF THE SOFTWARE PROVIDED FOR UNDER THIS LICENSE BY CALDERA INTERNATIONAL, INC. 
+ * AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL CALDERA INTERNATIONAL, INC. BE LIABLE FOR 
+ * ANY DIRECT, INDIRECT INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF 
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE. 
  */
 
 #include <limits.h>
@@ -51,60 +55,60 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define	QUOTE 0x80 /* ÒıÓÃ±êÖ¾Î»£¬ÏŞÖÆÁË×Ö·û¼¯Îª 7 Î» ASCII */
+#define	QUOTE 0x80 /* å¼•ç”¨æ ‡å¿—ä½ï¼Œé™åˆ¶äº†å­—ç¬¦é›†ä¸º 7 ä½ ASCII */
 
-/* Óï·¨Ê÷½Úµã×Ö¶Î¶¨Òå */
-#define	DTYP 0 /* type: ½ÚµãÀàĞÍ */
-#define	DLEF 1 /* left: ×ó×Ó½Úµã»òÊäÈëÖØ¶¨ÏòÎÄ¼şÃèÊö·û */
-#define	DRIT 2 /* right: ÓÒ×Ó½Úµã»òÊä³öÖØ¶¨ÏòÎÄ¼şÃèÊö·û */
-#define	DFLG 3 /* flag: ±êÖ¾Î»£¬Óï·¨Ê÷½ÚµãÊôĞÔ */
-#define	DSPR 4 /* space: ÔÚ¼òµ¥ÃüÁîµÄÊ±ºòÔ­°æ±¾ÊÇ¿ÕÎ»ÏÖÔÚÊÇ²ÎÊı¸öÊı£¬
-                * parentheses: ÔÚ¸´ºÏÃüÁîÊ±Ö¸Ïò×ÓÓï·¨Ê÷ */
-#define	DCOM 5 /* command: ²ÎÊı×ÖÁĞ±í */
+/* è¯­æ³•æ ‘èŠ‚ç‚¹å­—æ®µå®šä¹‰ */
+#define	DTYP 0 /* type: èŠ‚ç‚¹ç±»å‹ */
+#define	DLEF 1 /* left: å·¦å­èŠ‚ç‚¹æˆ–è¾“å…¥é‡å®šå‘æ–‡ä»¶æè¿°ç¬¦ */
+#define	DRIT 2 /* right: å³å­èŠ‚ç‚¹æˆ–è¾“å‡ºé‡å®šå‘æ–‡ä»¶æè¿°ç¬¦ */
+#define	DFLG 3 /* flag: æ ‡å¿—ä½ï¼Œè¯­æ³•æ ‘èŠ‚ç‚¹å±æ€§ */
+#define	DSPR 4 /* space: åœ¨ç®€å•å‘½ä»¤çš„æ—¶å€™åŸç‰ˆæœ¬æ˜¯ç©ºä½ç°åœ¨æ˜¯å‚æ•°ä¸ªæ•°ï¼Œ
+                * parentheses: åœ¨å¤åˆå‘½ä»¤æ—¶æŒ‡å‘å­è¯­æ³•æ ‘ */
+#define	DCOM 5 /* command: å‚æ•°å­—åˆ—è¡¨ */
 
-/* ÀàĞÍ¶¨Òå£¬ÓÃÓÚ DTYP */
-#define	TCOM 1 /* command: ¼òµ¥ÃüÁî */
-#define	TPAR 2 /* parentheses: ¸´ºÏÃüÁî */
-#define	TFIL 3 /* filter: ¹ıÂËÆ÷ */
-#define	TLST 4 /* list: ÃüÁîÁĞ±í */
+/* ç±»å‹å®šä¹‰ï¼Œç”¨äº DTYP */
+#define	TCOM 1 /* command: ç®€å•å‘½ä»¤ */
+#define	TPAR 2 /* parentheses: å¤åˆå‘½ä»¤ */
+#define	TFIL 3 /* filter: è¿‡æ»¤å™¨ */
+#define	TLST 4 /* list: å‘½ä»¤åˆ—è¡¨ */
 
-/* ±êÖ¾¶¨Òå£¬ÓÃÓÚ DFLG */
-#define	FAND 0x01 /* and: & ºóÌ¨Ö´ĞĞ */
-#define	FCAT 0x02 /* catenate: >> Ìí¼Ó·½Ê½µÄÊä³öÖØ¶¨Ïò */
-#define	FPIN 0x04 /* pipe in: ÃüÁî´Ó¹ÜµÀ»ñµÃÊäÈë */
-#define	FPOU 0x08 /* pipe out: ÃüÁîÏò¹ÜµÀ·¢ËÍÊä³ö */
-#define	FPAR 0x10 /* parentheses: ¸´ºÏÃüÁîÖĞ×îºóÒ»¸öÃüÁî */
-#define	FINT 0x20 /* interrupt: ºóÌ¨½ø³ÌºöÂÔÖĞ¶ÏĞÅºÅ */
-#define	FPRS 0x40 /* print string: ´òÓ¡ºóÌ¨½ø³Ì pid */
+/* æ ‡å¿—å®šä¹‰ï¼Œç”¨äº DFLG */
+#define	FAND 0x01 /* and: & åå°æ‰§è¡Œ */
+#define	FCAT 0x02 /* catenate: >> æ·»åŠ æ–¹å¼çš„è¾“å‡ºé‡å®šå‘ */
+#define	FPIN 0x04 /* pipe in: å‘½ä»¤ä»ç®¡é“è·å¾—è¾“å…¥ */
+#define	FPOU 0x08 /* pipe out: å‘½ä»¤å‘ç®¡é“å‘é€è¾“å‡º */
+#define	FPAR 0x10 /* parentheses: å¤åˆå‘½ä»¤ä¸­æœ€åä¸€ä¸ªå‘½ä»¤ */
+#define	FINT 0x20 /* interrupt: åå°è¿›ç¨‹å¿½ç•¥ä¸­æ–­ä¿¡å· */
+#define	FPRS 0x40 /* print string: æ‰“å°åå°è¿›ç¨‹ pid */
 
-char	*dolp = NULL; /* dollar p: Ö¸ÏòÃüÁîĞĞ²ÎÊıµÄÖ¸Õë */
-char	**dolv; /* dollar v: ÃüÁîĞĞ²ÎÊıÁĞ±í */
-int 	dolc; /* dollar c: ÃüÁîĞĞ²ÎÊı¸öÊı */
-char	pidp[11]; /* ±£´æ sh ×ÔÉí½ø³Ì pid µÄ×Ö·û´® */
-char	*promp; /* ÌáÊ¾·û */
-int 	peekc = 0; /* Ô¤¶Á×Ö·û */
-int 	gflg = 0; /* È«¾Ö±êÖ¾£¬Á½ÖÖÓÃÍ¾£º»º³åÇøÒç³ö£¬»ò°üº¬Í¨Åä·û */
-int 	error; /* Óï·¨·ÖÎö·¢ÏÖ´íÎó±êÖ¾ */
-int 	setintr = 0; /* ÉèÖÃÖĞ¶ÏĞÅºÅºöÂÔµÄ±êÖ¾ */
-char	*arginp = NULL; /* Ö¸Ïò°üº¬ÒªÖ´ĞĞµÄÃüÁîµÄ²ÎÊı£¬Ö´ĞĞÖ®ºóÍË³ö */
-int 	onelflg = 0; /* one line flag: ¶ÁÈ¡Ò»ĞĞÃüÁîÖ´ĞĞ²¢ÍË³ö±êÖ¾ */
-uid_t	uid; /* sh ½ø³ÌµÄÕæÊµ uid */
-jmp_buf	jmpbuf; /* ¿çº¯ÊıÌø×ªÓÃÀ´±£´æµ±Ç°×´Ì¬µÄ»º³åÇø */
-int 	exitstat = 0; /* Ö´ĞĞÃüÁîµÄÖÕÖ¹×´Ì¬ */
-char	exitp[4]; /* ±£´æÖÕÖ¹×´Ì¬µÄ×Ö·û´® */
+char	*dolp = NULL; /* dollar p: æŒ‡å‘å‘½ä»¤è¡Œå‚æ•°çš„æŒ‡é’ˆ */
+char	**dolv; /* dollar v: å‘½ä»¤è¡Œå‚æ•°åˆ—è¡¨ */
+int 	dolc; /* dollar c: å‘½ä»¤è¡Œå‚æ•°ä¸ªæ•° */
+char	pidp[11]; /* ä¿å­˜ sh è‡ªèº«è¿›ç¨‹ pid çš„å­—ç¬¦ä¸² */
+char	*promp; /* æç¤ºç¬¦ */
+int 	peekc = 0; /* é¢„è¯»å­—ç¬¦ */
+int 	gflg = 0; /* å…¨å±€æ ‡å¿—ï¼Œä¸¤ç§ç”¨é€”ï¼šç¼“å†²åŒºæº¢å‡ºï¼Œæˆ–åŒ…å«é€šé…ç¬¦ */
+int 	error; /* è¯­æ³•åˆ†æå‘ç°é”™è¯¯æ ‡å¿— */
+int 	setintr = 0; /* è®¾ç½®ä¸­æ–­ä¿¡å·å¿½ç•¥çš„æ ‡å¿— */
+char	*arginp = NULL; /* æŒ‡å‘åŒ…å«è¦æ‰§è¡Œçš„å‘½ä»¤çš„å‚æ•°ï¼Œæ‰§è¡Œä¹‹åé€€å‡º */
+int 	onelflg = 0; /* one line flag: è¯»å–ä¸€è¡Œå‘½ä»¤æ‰§è¡Œå¹¶é€€å‡ºæ ‡å¿— */
+uid_t	uid; /* sh è¿›ç¨‹çš„çœŸå® uid */
+jmp_buf	jmpbuf; /* è·¨å‡½æ•°è·³è½¬ç”¨æ¥ä¿å­˜å½“å‰çŠ¶æ€çš„ç¼“å†²åŒº */
+int 	exitstat = 0; /* æ‰§è¡Œå‘½ä»¤çš„ç»ˆæ­¢çŠ¶æ€ */
+char	exitp[4]; /* ä¿å­˜ç»ˆæ­¢çŠ¶æ€çš„å­—ç¬¦ä¸² */
 
-char	*linep, *elinep; /* ²Ù×İĞĞ»º³åÇøµÄÖ¸Õë */
-char	**argp, **eargp; /* ²Ù×İ×ÖÁĞ±í´æ´¢¿Õ¼äµÄÖ¸Õë */
-int 	*treep, *treeend; /* ²Ù×İÓï·¨Ê÷½Úµã´æ´¢¿Õ¼äµÄÖ¸Õë */
+char	*linep, *elinep; /* æ“çºµè¡Œç¼“å†²åŒºçš„æŒ‡é’ˆ */
+char	**argp, **eargp; /* æ“çºµå­—åˆ—è¡¨å­˜å‚¨ç©ºé—´çš„æŒ‡é’ˆ */
+int 	*treep, *treeend; /* æ“çºµè¯­æ³•æ ‘èŠ‚ç‚¹å­˜å‚¨ç©ºé—´çš„æŒ‡é’ˆ */
 
 #define	LINSIZ _POSIX_ARG_MAX
-#define	ARGSIZ LINSIZ/20 /* ¼Ù¶¨Æ½¾ùÃ¿¸ö×ÖÓĞ 20 ¸ö×Ö·û */
+#define	ARGSIZ LINSIZ/20 /* å‡å®šå¹³å‡æ¯ä¸ªå­—æœ‰ 20 ä¸ªå­—ç¬¦ */
 #define	TRESIZ ARGSIZ*2
-char	line[LINSIZ]; /* ÃüÁîĞĞ»º³åÇø */
-char	*args[ARGSIZ]; /* ×ÖÁĞ±í */
-int 	trebuf[TRESIZ]; /* ´æ´¢Óï·¨Ê÷½Úµã */
+char	line[LINSIZ]; /* å‘½ä»¤è¡Œç¼“å†²åŒº */
+char	*args[ARGSIZ]; /* å­—åˆ—è¡¨ */
+int 	trebuf[TRESIZ]; /* å­˜å‚¨è¯­æ³•æ ‘èŠ‚ç‚¹ */
 
-/* Õï¶ÏÏûÏ¢ */
+/* è¯Šæ–­æ¶ˆæ¯ */
 #define NSIGMSG 18
 char *mesg[NSIGMSG] = {
 	NULL,
@@ -117,7 +121,7 @@ char *mesg[NSIGMSG] = {
 	"Signal 7", /* SIGEMT 7 */
 	"Floating point exception", /* SIGFPE 8 */
 	"Killed", /* SIGKILL 9 */
-	"Signal 10", /* SIGBUS 10 */
+	"Signal 10", /* SIGBUS 10 */	
 	"Segmentation violation", /* SIGSEGV 11 */
 	"Bad argument to system call", /* SIGSYS 12 */
 	NULL, /* SIGPIPE 13 */
@@ -157,67 +161,67 @@ extern int glob(int argc, char *argv[]);
 
 int main(int argc, char **argv)
 {
-	register int f;	/* ÎÄ¼şÃèÊö·û */
-	int *t; /* Óï·¨Ê÷ */
+	register int f;	/* æ–‡ä»¶æè¿°ç¬¦ */
+	int *t; /* è¯­æ³•æ ‘ */
 
-	/* ¹Ø±Õ´ò¿ªµÄÎÄ¼ş */
-	for (f=STDERR_FILENO; f<sysconf(_SC_OPEN_MAX); f++)
+	/* å…³é—­æ‰“å¼€çš„æ–‡ä»¶ */
+	for(f=STDERR_FILENO; f<sysconf(_SC_OPEN_MAX); f++)
 		close(f);
-	/* ¸´ÖÆ±ê×¼Êä³öµ½±ê×¼´íÎóÊä³ö */
-	if ((f=dup(STDOUT_FILENO)) != STDERR_FILENO)
+	/* å¤åˆ¶æ ‡å‡†è¾“å‡ºåˆ°æ ‡å‡†é”™è¯¯è¾“å‡º */
+	if((f=dup(STDOUT_FILENO)) != STDERR_FILENO)
 		close(f);
 
-	/* »ñµÃ½ø³Ì±êÊ¶(32Î»ÕûÊı)£¬²¢×ª»»³É×Ö·û´®£¬ÁÙÊ±½èÓÃ dolc ±äÁ¿ */
+	/* è·å¾—è¿›ç¨‹æ ‡è¯†(32ä½æ•´æ•°)ï¼Œå¹¶è½¬æ¢æˆå­—ç¬¦ä¸²ï¼Œä¸´æ—¶å€Ÿç”¨ dolc å˜é‡ */
 	dolc = (int)getpid();
 	sprn(dolc, pidp);
-	/* ÅĞ¶Ïµ±Ç°Ê±ºòÊÇ·ñ¸ùÓÃ»§£¬ÉèÖÃÕıÈ·µÄÌáÊ¾·û */
-	if ((uid = getuid()) == 0) /* ¸ùÓÃ»§ */
+	/* åˆ¤æ–­å½“å‰æ—¶å€™æ˜¯å¦æ ¹ç”¨æˆ·ï¼Œè®¾ç½®æ­£ç¡®çš„æç¤ºç¬¦ */
+	if((uid = getuid()) == 0) /* æ ¹ç”¨æˆ· */
 		promp = "# ";
 	else
 		promp = "% ";
 	setuid(uid);
 	setgid(getgid());
 
-	if (argc > 1) {	/* ÓĞ²ÎÊı»òÑ¡Ïî */
-		promp = 0;	/* ÉèÖÃÎª·Ç½»»¥Ä£Ê½ */
-		if (*argv[1]=='-') { /* ÓĞÑ¡Ïî */
-			**argv = '-';  /* °Ñ²ÎÊı 0 µÄµÚÒ»¸ö×Ö·ûÉèÖÃÎª - */
-			if (argv[1][1]=='c' && argc>2) /* -c °ÑÏÂÒ»¸ö²ÎÊı×÷ÎªÃüÁîÖ´ĞĞ */
+	if(argc > 1) {	/* æœ‰å‚æ•°æˆ–é€‰é¡¹ */
+		promp = 0;	/* è®¾ç½®ä¸ºéäº¤äº’æ¨¡å¼ */
+		if (*argv[1]=='-') { /* æœ‰é€‰é¡¹ */
+			**argv = '-';  /* æŠŠå‚æ•° 0 çš„ç¬¬ä¸€ä¸ªå­—ç¬¦è®¾ç½®ä¸º - */
+			if (argv[1][1]=='c' && argc>2) /* -c æŠŠä¸‹ä¸€ä¸ªå‚æ•°ä½œä¸ºå‘½ä»¤æ‰§è¡Œ */
 				arginp = argv[2];
-			else if (argv[1][1]=='t') /* -t: ´Ó±ê×¼ÊäÈë¶ÁÈëÒ»ĞĞÖ´ĞĞ²¢ÍË³ö */
+			else if (argv[1][1]=='t') /* -t: ä»æ ‡å‡†è¾“å…¥è¯»å…¥ä¸€è¡Œæ‰§è¡Œå¹¶é€€å‡º */
 				onelflg = 2;
-		} else { /* ÓĞÃüÁîÎÄ¼ş */
-			/* ÔÚ±ê×¼ÊäÈëÉÏ´ò¿ª°üº¬ÒªÖ´ĞĞµÄÃüÁîµÄÎÄ¼ş */
+		} else { /* æœ‰å‘½ä»¤æ–‡ä»¶ */
+			/* åœ¨æ ‡å‡†è¾“å…¥ä¸Šæ‰“å¼€åŒ…å«è¦æ‰§è¡Œçš„å‘½ä»¤çš„æ–‡ä»¶ */
 			close(STDIN_FILENO);
 			f = open(argv[1], O_RDONLY);
-			if (f < 0) { /* ´ò²»¿ªÖ¸¶¨ÎÄ¼ş */
+			if(f < 0) { /* æ‰“ä¸å¼€æŒ‡å®šæ–‡ä»¶ */
 				prs(argv[1]);
 				err(": cannot open");
 			}
 		}
 	}
-	if (**argv == '-') { /* ÓĞÑ¡Ïî */
+	if(**argv == '-') { /* æœ‰é€‰é¡¹ */
 		setintr++;
-		/* ÉèÖÃÖĞ¶ÏĞÅºÅ´¦Àí³ÌĞòÎªºöÂÔĞÅºÅ */
+		/* è®¾ç½®ä¸­æ–­ä¿¡å·å¤„ç†ç¨‹åºä¸ºå¿½ç•¥ä¿¡å· */
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, SIG_IGN);
 	}
-	dolv = argv+1; /* ²ÎÊıÁĞ±íÖ¸ÕëÓÒÒÆ */
-	dolc = argc-1; /* ²ÎÊıÊıÄ¿¼õÉÙ */
+	dolv = argv+1; /* å‚æ•°åˆ—è¡¨æŒ‡é’ˆå³ç§» */
+	dolc = argc-1; /* å‚æ•°æ•°ç›®å‡å°‘ */
 
-	/* Ö÷Ñ­»·: É¨ÃèÃüÁîĞĞ£¬·ÖÎöºÍÖ´ĞĞÓï·¨Ê÷ */
-	for (;;) {
+	/* ä¸»å¾ªç¯: æ‰«æå‘½ä»¤è¡Œï¼Œåˆ†æå’Œæ‰§è¡Œè¯­æ³•æ ‘ */
+	for(;;) {
 		error = 0;
 		gflg = 0;
-		if (promp != 0)	/* ½»»¥Ä£Ê½ÔËĞĞ */
-			prs(promp);
+		if(promp != 0)	/* äº¤äº’æ¨¡å¼è¿è¡Œ */
+			prs(promp);	
 		lexscan();
-		if (gflg != 0) { /* ·¢ÉúÃüÁîĞĞ×Ö·ûÒç³ö */
+		if(gflg != 0) {/* å‘ç”Ÿå‘½ä»¤è¡Œå­—ç¬¦æº¢å‡º */
 			err("Command line overflow");
 			continue;
 		}
 		t = parse();
-		if (error != 0) { /* Óï·¨·ÖÎö·¢ÏÖ´íÎó */
+		if(error != 0) {/* è¯­æ³•åˆ†æå‘ç°é”™è¯¯ */
 			err("syntax error");
 			continue;
 		}
@@ -227,193 +231,193 @@ int main(int argc, char **argv)
 }
 
 /*
- * ´Ê·¨É¨Ãè
+ * è¯æ³•æ‰«æ
  */
 void lexscan(void)
 {
 	register char *cp;
 	register int c;
-	/* ³õÊ¼»¯ĞĞ»º³åÇø¡¢×ÖÁĞ±í¿Õ¼äºÍÏà¹ØÖ¸Õë */
-	argp = args+1; /* ¿Õ³öÒ»¸öÎ»ÖÃ */
+	/* åˆå§‹åŒ–è¡Œç¼“å†²åŒºã€å­—åˆ—è¡¨ç©ºé—´å’Œç›¸å…³æŒ‡é’ˆ */
+	argp = args+1; /* ç©ºå‡ºä¸€ä¸ªä½ç½® */
 	eargp = args+ARGSIZ-5;
 	linep = line;
 	elinep = line+LINSIZ-5;
 
-	/* ¹ıÂËµô×¢ÊÍĞĞ */
+	/* è¿‡æ»¤æ‰æ³¨é‡Šè¡Œ */
 	do c = nextc();
 	while (c == ' ' || c == '\t');
 	if (c == '#')
 		while ((c = nextc()) != '\n');
-	peekc = (char) c; /* ËÍ»Ø×îºóµÄ»»ĞĞ·û */
-
-	/* °ÑÃüÁîĞĞÉ¨Ãèµ½×ÖÁĞ±íÖĞ */
+	peekc = (char) c; /* é€å›æœ€åçš„æ¢è¡Œç¬¦ */
+	
+	/* æŠŠå‘½ä»¤è¡Œæ‰«æåˆ°å­—åˆ—è¡¨ä¸­ */
 	do {
-		cp = linep; /* cp Ö¸Ïòµ±Ç°Òª¶ÁÈëµÄ×ÖÔÚĞĞ»º³åÇøÖĞµÄÎ»ÖÃ */
-		word(); /* ¶ÁÈëÒ»¸ö×Öµ½ĞĞ»º³åÇøÖĞ */
-	} while (*cp != '\n'); /* Ñ­»·Ö±µ½¶Áµ½»»ĞĞ·û */
+		cp = linep; /* cp æŒ‡å‘å½“å‰è¦è¯»å…¥çš„å­—åœ¨è¡Œç¼“å†²åŒºä¸­çš„ä½ç½® */
+		word(); /* è¯»å…¥ä¸€ä¸ªå­—åˆ°è¡Œç¼“å†²åŒºä¸­ */
+	} while(*cp != '\n'); /* å¾ªç¯ç›´åˆ°è¯»åˆ°æ¢è¡Œç¬¦ */
 }
 
 /*
- * ´ÓÊäÈëÖĞ¶Á³öÒ»¸ö×Öµ½ĞĞ»º³åÇøÖĞ£¬²¢Ôö¼ÓÒ»¸ö×ÖÁĞ±íÔªËØ
- * ±»µ÷ÓÚ lexscan()
- * µ÷ÓÃ nextc() readc()
+ * ä»è¾“å…¥ä¸­è¯»å‡ºä¸€ä¸ªå­—åˆ°è¡Œç¼“å†²åŒºä¸­ï¼Œå¹¶å¢åŠ ä¸€ä¸ªå­—åˆ—è¡¨å…ƒç´ 
+ * è¢«è°ƒäº lexscan() 
+ * è°ƒç”¨ nextc() readc()
  */
 void word(void)
 {
 	register int c, c1;
-
-	/* ×ÖÁĞ±íµÄµ±Ç°ÔªËØÖ¸ÕëÖ¸Ïòµ±Ç°Òª¶ÁÈëµÄ×ÖÔÚĞĞ»º³åÇøÖĞµÄÎ»ÖÃ */
+	
+	/* å­—åˆ—è¡¨çš„å½“å‰å…ƒç´ æŒ‡é’ˆæŒ‡å‘å½“å‰è¦è¯»å…¥çš„å­—åœ¨è¡Œç¼“å†²åŒºä¸­çš„ä½ç½® */
 	*argp++ = linep;
 
-	/* ºöÂÔ×ÖÇ°¿Õ°× */
+	/* å¿½ç•¥å­—å‰ç©ºç™½ */
 	do c = nextc();
 	while (c == ' ' || c == '\t');
-	/* ´¦Àí shell µÄÔª×Ö·ûºÍ»»ĞĞ·û */
-	if (any(c, ";&<>()|\n")) {
-		*linep++ = (char) c; /* °ÑÕâ¸öÔª×Ö·û»ò»»ĞĞ·ûĞ´µ½ĞĞ»º³åÇøÖĞ */
-		*linep++ = '\0'; /* ÖÕ½áÕâ¸ö×Ö·û´® */
-		return;
+	/* å¤„ç† shell çš„å…ƒå­—ç¬¦å’Œæ¢è¡Œç¬¦ */
+	if(any(c, ";&<>()|\n")) {	 
+		*linep++ = (char) c; /* æŠŠè¿™ä¸ªå…ƒå­—ç¬¦æˆ–æ¢è¡Œç¬¦å†™åˆ°è¡Œç¼“å†²åŒºä¸­ */
+		*linep++ = '\0'; /* ç»ˆç»“è¿™ä¸ªå­—ç¬¦ä¸² */
+		return;	
 	}
-	/* ¶Áµ½ÆÕÍ¨×Ö·û */
-	peekc = c; /* ËÍ»ØÕâ¸öÆÕÍ¨×Ö·û */
-	for (;;) {
+	/* è¯»åˆ°æ™®é€šå­—ç¬¦ */
+	peekc = c; /* é€å›è¿™ä¸ªæ™®é€šå­—ç¬¦ */
+	for(;;) {
 		c = nextc();
-		if (any(c, " \t;&<>()|\n")) { /* ¶Áµ½¿Õ°×¡¢Ôª×Ö·û»ò»»ĞĞ·û */
-			peekc = (char) c; /* ËÍ»ØÕâ¸ö×Ö·û */
-			*linep++ = '\0'; /* ÖÕ½áÕâ¸ö×Ö·û´® */
+		if(any(c, " \t;&<>()|\n")) { /* è¯»åˆ°ç©ºç™½ã€å…ƒå­—ç¬¦æˆ–æ¢è¡Œç¬¦ */
+			peekc = (char) c; /* é€å›è¿™ä¸ªå­—ç¬¦ */
+			*linep++ = '\0'; /* ç»ˆç»“è¿™ä¸ªå­—ç¬¦ä¸² */
 			return;
 		}
-		if (c == '\'' || c == '"') { /* ¶Áµ½µ¥ÒıºÅ»òË«ÒıºÅ */
-			c1 = c; /* ÂÔ¹ıÕâ¸öµ¥ÒıºÅ»òË«ÒıºÅ */
-			while ((c=readc()) != c1) {
-				if (c == '\n') {
-					error++;	/* ÒıÓÃÃ»ÓĞÔÚ±¾ĞĞÍê½á */
-					peekc = (char) c; /* ËÍ»ØÕâ¸ö×Ö·û */
+		if(c == '\'' || c == '"') {/* è¯»åˆ°å•å¼•å·æˆ–åŒå¼•å· */
+			c1 = c; /* ç•¥è¿‡è¿™ä¸ªå•å¼•å·æˆ–åŒå¼•å· */
+			while((c=readc()) != c1) {
+				if(c == '\n') {
+					error++;	/* å¼•ç”¨æ²¡æœ‰åœ¨æœ¬è¡Œå®Œç»“ */
+					peekc = (char) c; /* é€å›è¿™ä¸ªå­—ç¬¦ */
 					return;
 				}
-				/* ¶ÔÒıºÅ°üÎ§µÄ×Ö·ûÉèÖÃÒıÓÃ±êÖ¾Î»£¬²¢Ğ´µ½ĞĞ»º³åÇøÖĞ */
+				/* å¯¹å¼•å·åŒ…å›´çš„å­—ç¬¦è®¾ç½®å¼•ç”¨æ ‡å¿—ä½ï¼Œå¹¶å†™åˆ°è¡Œç¼“å†²åŒºä¸­ */
 				*linep++ = (char) c|QUOTE;
 			}
-			continue; /* ÂÔ¹ıÆ¥ÅäµÄµ¥ÒıºÅ»òË«ÒıºÅ */
+			continue; /* ç•¥è¿‡åŒ¹é…çš„å•å¼•å·æˆ–åŒå¼•å· */ 
 		}
-		*linep++ = (char) c; /* °ÑÕâ¸öÆÕÍ¨×Ö·ûĞ´ÈëĞĞ»º³åÇø */
+		*linep++ = (char) c; /* æŠŠè¿™ä¸ªæ™®é€šå­—ç¬¦å†™å…¥è¡Œç¼“å†²åŒº */
 	}
 }
 
 /*
- * ´ÓÊäÈëÖĞ¶Á³öÒ»¸ö×Ö·û£¬´øÓĞ±äÁ¿Ìæ»»
- * ±»µ÷ÓÚ word()
- * µ÷ÓÃ readc()
+ * ä»è¾“å…¥ä¸­è¯»å‡ºä¸€ä¸ªå­—ç¬¦ï¼Œå¸¦æœ‰å˜é‡æ›¿æ¢
+ * è¢«è°ƒäº word()
+ * è°ƒç”¨ readc()
  */
 int nextc(void)
 {
 	int c;
 
-	if (peekc) { /* ÒÑ¾­Ô¤¶ÁÁËÒ»¸ö×Ö·û */
+	if(peekc) { /* å·²ç»é¢„è¯»äº†ä¸€ä¸ªå­—ç¬¦ */
 		c = peekc;
 		peekc = 0;
 		return c;
 	}
-	if (argp > eargp) { /* ×ÖÁĞ±í¿Õ¼äÒç³ö */
+	if(argp > eargp) { /* å­—åˆ—è¡¨ç©ºé—´æº¢å‡º */
 		argp -= 10;
-		while ((c=nextc()) != '\n'); /* ºöÂÔ¶à³öÀ´µÄËùÓĞ×Ö·û */
+		while((c=nextc()) != '\n'); /* å¿½ç•¥å¤šå‡ºæ¥çš„æ‰€æœ‰å­—ç¬¦ */
 		argp += 10;
 		err("Too many args");
 		gflg++;
 		return c;
 	}
-	if (linep > elinep) { /* ĞĞ»º³åÇø¿Õ¼äÒç³ö */
+	if(linep > elinep) {  /* è¡Œç¼“å†²åŒºç©ºé—´æº¢å‡º */
 		linep -= 10;
-		while ((c=nextc()) != '\n'); /* ºöÂÔ¶à³öÀ´µÄËùÓĞ×Ö·û */
+		while((c=nextc()) != '\n'); /* å¿½ç•¥å¤šå‡ºæ¥çš„æ‰€æœ‰å­—ç¬¦ */
 		linep += 10;
 		err("Too many characters");
 		gflg++;
 		return c;
 	}
-	if (dolp == NULL) { /* µ±Ç°Î´´¦Àí $ */
+	if(dolp == NULL) { /* å½“å‰æœªå¤„ç† $ */
 		c = readc();
-		if (c == '\\') { /* ×ªÒå·û */
+		if(c == '\\') { /* è½¬ä¹‰ç¬¦ */
 			c = readc();
-			if (c == '\n') /* ĞĞ½ÓĞø */
+			if(c == '\n') /* è¡Œæ¥ç»­ */
 				return ' ';
-			return (c|QUOTE); /* ÒıÓÃÕâ¸ö×Ö·û */
+			return(c|QUOTE); /* å¼•ç”¨è¿™ä¸ªå­—ç¬¦ */
 		}
-		if (c == '$') { /* ±äÁ¿Ìæ»» */
+		if(c == '$') { /* å˜é‡æ›¿æ¢ */
 			c = readc();
-			if (c>='0' && c<='9') { /* Î»ÖÃ²ÎÊı */
-				if (c-'0' < dolc)
+			if(c>='0' && c<='9') { /* ä½ç½®å‚æ•° */
+				if(c-'0' < dolc)
 					dolp = dolv[c-'0'];
 			}
-			if (c == '$') { /* ½ø³Ì±êÊ¶ */
+			if(c == '$') { /* è¿›ç¨‹æ ‡è¯† */
 				dolp = pidp;
 			}
-			if (c == '?') { /* ÍË³ö×´Ì¬ */
+			if(c == '?') { /* é€€å‡ºçŠ¶æ€ */
 				sprn(exitstat, exitp);
 				dolp = exitp;
 			}
 		}
 	}
-	if (dolp != NULL) { /* µ±Ç°´¦Àí $ */
+	if (dolp != NULL) { /* å½“å‰å¤„ç† $ */
 		c = *dolp++;
-		if (c != '\0')
+		if(c != '\0')
 			return c;
 		dolp = NULL;
 	}
-	return c&~QUOTE; /* Çå³ıÒıÓÃÎ» */
+	return c&~QUOTE; /* æ¸…é™¤å¼•ç”¨ä½ */
 }
 
 /*
- * ´ÓÊäÈëÖĞ¶ÁÈ¡Ò»¸ö×Ö·û
- * ±»µ÷ÓÚ word() nextc()
+ * ä»è¾“å…¥ä¸­è¯»å–ä¸€ä¸ªå­—ç¬¦
+ * è¢«è°ƒäº word() nextc()
  */
 int readc(void)
 {
 	char cc;
 	int c;
 
-	if (arginp) { /* ÓĞ -c Ñ¡Ïî£¬onelflg == 0 */
-		/* ´Ó arginp ÖĞ¶ÁÈ¡×Ö·û */
-		if ((c = (int)*arginp++) == 0) { /* Ã»ÓĞÒª×÷ÎªÃüÁîµÄ²ÎÊı */
-			arginp = NULL;
-			onelflg++; /* ÉèÖÃÏÂ´ÎÖ´ĞĞ±¾º¯ÊıµÄÊ±ºòÍË³ö */
+	if (arginp) { /* æœ‰ -c é€‰é¡¹ï¼Œonelflg == 0 */
+		/* ä» arginp ä¸­è¯»å–å­—ç¬¦ */
+		if ((c = (int)*arginp++) == 0) { /* æ²¡æœ‰è¦ä½œä¸ºå‘½ä»¤çš„å‚æ•° */
+			arginp = NULL; 
+			onelflg++; /* è®¾ç½®ä¸‹æ¬¡æ‰§è¡Œæœ¬å‡½æ•°çš„æ—¶å€™é€€å‡º */
 			c = '\n';
 		}
 		return c;
 	}
 	if (onelflg==1)
 		exit(0);
-	if (read(STDIN_FILENO, &cc, 1) != 1) /* ¶ÁÒ»¸ö×Ö·û */
+	if(read(STDIN_FILENO, &cc, 1) != 1) /* è¯»ä¸€ä¸ªå­—ç¬¦ */
 		exit(0);
-	/* ÓĞ -t Ñ¡Ïî£¬onelflg == 2£¬´Ó±ê×¼ÊäÈë¶ÁÈëÁË»»ĞĞ·û */
+	/* æœ‰ -t é€‰é¡¹ï¼Œonelflg == 2ï¼Œä»æ ‡å‡†è¾“å…¥è¯»å…¥äº†æ¢è¡Œç¬¦ */
 	if (cc=='\n' && onelflg)
-		onelflg--; /* ÉèÖÃÏÂ´ÎÖ´ĞĞ±¾º¯ÊıµÄÊ±ºòÍË³ö */
+		onelflg--; /* è®¾ç½®ä¸‹æ¬¡æ‰§è¡Œæœ¬å‡½æ•°çš„æ—¶å€™é€€å‡º */
 	return (int)cc;
 }
 
 /*
- * Óï·¨·ÖÎö
+ * è¯­æ³•åˆ†æ
  */
 int * parse(void)
 {
-	/* ³õÊ¼»¯Óï·¨Ê÷½Úµã¿Õ¼äºÍÏà¹ØÖ¸Õë */
+	/* åˆå§‹åŒ–è¯­æ³•æ ‘èŠ‚ç‚¹ç©ºé—´å’Œç›¸å…³æŒ‡é’ˆ */
 	treep = trebuf;
 	treeend = &trebuf[TRESIZ];
-	char **p = args+1; /* ÏàÓ¦µÄÁô³ö¿ÕÎ» */
+	char **p = args+1; /* ç›¸åº”çš„ç•™å‡ºç©ºä½ */
 
 	if (setjmp(jmpbuf) != 0)
-		/* Ã»ÓĞ¿Õ¼ä·ÖÅäÓï·¨Ê÷½ÚµãµÄÁË */
+	    /* æ²¡æœ‰ç©ºé—´åˆ†é…è¯­æ³•æ ‘èŠ‚ç‚¹çš„äº† */
 		return NULL;
 
-	/* ºöÂÔÇ°µ¼µÄ»»ĞĞ·û */
-	while (p != argp && (int)**p == '\n')
+	/* å¿½ç•¥å‰å¯¼çš„æ¢è¡Œç¬¦ */
+	while(p != argp && (int)**p == '\n')
 		p++;
-	/* args Ö¸ÏòÊÇ×ÖÁĞ±íµÄµÚÒ»¸öÔªËØ£¬
-	 * argp Ö¸ÏòÊÇ×ÖÁĞ±íµÄ×îºóÒ»¸öÔªËØºóÃæµÄÒ»¸öÔªËØ */
+	/* args æŒ‡å‘æ˜¯å­—åˆ—è¡¨çš„ç¬¬ä¸€ä¸ªå…ƒç´ ï¼Œ
+	 * argp æŒ‡å‘æ˜¯å­—åˆ—è¡¨çš„æœ€åä¸€ä¸ªå…ƒç´ åé¢çš„ä¸€ä¸ªå…ƒç´  */
 	return  cmdlist(p, argp);
 }
 
-/*
- *  ÃüÁîÁĞ±í
+/* 
+ *  å‘½ä»¤åˆ—è¡¨
  *	cmdlist:
  *		empty
  *		pipeline
@@ -427,11 +431,11 @@ int * cmdlist(char **p1, char **p2)
 	int l;
 
 	if (p1 == p2)
-		return NULL; /* ¿ÕÃüÁîÁĞ±í */
+		return NULL; /* ç©ºå‘½ä»¤åˆ—è¡¨ */
 
-	l = 0; /* Ç¶Ì×²ãÊı */
-	for (p=p1; p!=p2; p++)
-		switch (**p) {
+	l = 0; /* åµŒå¥—å±‚æ•° */
+	for(p=p1; p!=p2; p++)
+		switch(**p) {
 
 		case '(':
 			l++;
@@ -439,47 +443,47 @@ int * cmdlist(char **p1, char **p2)
 
 		case ')':
 			l--;
-			if (l < 0)
+			if(l < 0)
 				error++;
 			break;
 
-			/* ÕÒµ½Ò»¸öÁĞ±í·Ö¸ô·û */
+		/* æ‰¾åˆ°ä¸€ä¸ªåˆ—è¡¨åˆ†éš”ç¬¦ */
 		case '&':
 		case ';':
 		case '\n':
-			if (l == 0) { /* Èç¹ûÕâ¸öÁĞ±í·Ö¸ô·û²»ÔÚÔ²À¨ºÅ°üÎ§ÄÚ */
+			if(l == 0) { /* å¦‚æœè¿™ä¸ªåˆ—è¡¨åˆ†éš”ç¬¦ä¸åœ¨åœ†æ‹¬å·åŒ…å›´å†… */
 				l = **p;
 				t = tree(4);
-				t[DTYP] = TLST; /* ÀàĞÍÊÇÃüÁîÁĞ±í */
-				t[DLEF] = (int)pipeline(p1, p);
-				t[DFLG] = 0;  /* ÃüÁîÁĞ±í½Úµã²»ÉèÖÃÈÎºÎ±êÖ¾Î» */
-				if (l == '&') { /* ĞèÒªºóÌ¨´¦Àí */
+				t[DTYP] = TLST; /* ç±»å‹æ˜¯å‘½ä»¤åˆ—è¡¨ */
+				t[DLEF] = (int)pipeline(p1, p); 
+				t[DFLG] = 0;  /* å‘½ä»¤åˆ—è¡¨èŠ‚ç‚¹ä¸è®¾ç½®ä»»ä½•æ ‡å¿—ä½ */
+				if(l == '&') { /* éœ€è¦åå°å¤„ç† */
 					t1 = (int *)t[DLEF];
-					/* ÉèÖÃ×ó×Ó½Úµã±êÖ¾ */
-					t1[DFLG] |= FAND|FPRS|FINT;
-					/*
-					 * ºóÌ¨ÔËĞĞµÄÕâĞ©±êÖ¾Î»Ö»ÉèÖÃµ½ÔÚ¹ÜµÀÏß½ÚµãÉÏ£¬
-					 * ËùÒÔÔÚÖ´ĞĞµÄÊ±ºòĞèÒªÍ¨¹ı¼Ì³ĞÀ´ÏÂ´«µ½¸÷¸öÃüÁî½ÚµãÉÏ¡£
+					/* è®¾ç½®å·¦å­èŠ‚ç‚¹æ ‡å¿— */
+					t1[DFLG] |= FAND|FPRS|FINT;	
+					/* 
+					 * åå°è¿è¡Œçš„è¿™äº›æ ‡å¿—ä½åªè®¾ç½®åˆ°åœ¨ç®¡é“çº¿èŠ‚ç‚¹ä¸Šï¼Œ
+					 * æ‰€ä»¥åœ¨æ‰§è¡Œçš„æ—¶å€™éœ€è¦é€šè¿‡ç»§æ‰¿æ¥ä¸‹ä¼ åˆ°å„ä¸ªå‘½ä»¤èŠ‚ç‚¹ä¸Šã€‚
 					 */
 				}
-				/* ÈÏ¶¨¶àÓàµÄÁĞ±í·Ö¸ô·ûÎªÓï·¨´íÎó */
+				/* è®¤å®šå¤šä½™çš„åˆ—è¡¨åˆ†éš”ç¬¦ä¸ºè¯­æ³•é”™è¯¯ */
 				if (any((int)*(p+1),";&")) {
 					error++;
 					return NULL;
 				}
-				t[DRIT] = (int)cmdlist(p+1, p2);
+				t[DRIT] = (int)cmdlist(p+1, p2); 
 				return t;
 			}
 		}
-	/* Ã»ÓĞÕÒµ½ÁĞ±í·Ö¸ô·û£¬Õâ¸öÃüÁîÁĞ±í³öÏÖÔÚÔ²À¨ºÅÄÚ */
-	if (l == 0)
+	/* æ²¡æœ‰æ‰¾åˆ°åˆ—è¡¨åˆ†éš”ç¬¦ï¼Œè¿™ä¸ªå‘½ä»¤åˆ—è¡¨å‡ºç°åœ¨åœ†æ‹¬å·å†… */
+	if(l == 0)
 		return pipeline(p1, p2);
 	error++;
 	return NULL;
 }
 
 /*
- *  ¹ÜµÀÏß
+ *  ç®¡é“çº¿ 
  *	pipeline:
  *		command
  *		command | pipeline
@@ -489,9 +493,9 @@ int * pipeline(char **p1, char **p2)
 	register char **p;
 	int l, *t;
 
-	l = 0; /* Ç¶Ì×²ãÊı */
-	for (p=p1; p!=p2; p++)
-		switch (**p) {
+	l = 0; /* åµŒå¥—å±‚æ•° */
+	for(p=p1; p!=p2; p++)
+		switch(**p) {
 
 		case '(':
 			l++;
@@ -501,23 +505,23 @@ int * pipeline(char **p1, char **p2)
 			l--;
 			break;
 
-			/* ÕÒµ½Ò»¸ö¹ÜµÀ·ûºÅ */
+		/* æ‰¾åˆ°ä¸€ä¸ªç®¡é“ç¬¦å· */
 		case '|':
-			if (l == 0) { /* Èç¹û¹ÜµÀ·ûºÅ²»ÔÚÀ¨ºÅ°üÎª°üÎ§ÄÚ */
+			if(l == 0) { /* å¦‚æœç®¡é“ç¬¦å·ä¸åœ¨æ‹¬å·åŒ…ä¸ºåŒ…å›´å†… */
 				t = tree(4);
-				t[DTYP] = TFIL;	/* ÀàĞÍÊÇ¹ÜµÀÏß */
+				t[DTYP] = TFIL;	/* ç±»å‹æ˜¯ç®¡é“çº¿ */
 				t[DLEF] = (int)command(p1, p);
 				t[DRIT] = (int)pipeline(p+1, p2);
-				t[DFLG] = 0; /* ±êÖ¾Î»ÓÉÉÏ¼¶µÄ cmdlist ÉèÖÃ */
+				t[DFLG] = 0; /* æ ‡å¿—ä½ç”±ä¸Šçº§çš„ cmdlist è®¾ç½® */
 				return t;
 			}
 		}
-	/* Ã»ÓĞÕÒµ½¹ÜµÀ·ûºÅ£¬ÊÇ¹ÜµÀÏßÄ©¶Ë»ò¼òµ¥ÃüÁî */
+	/* æ²¡æœ‰æ‰¾åˆ°ç®¡é“ç¬¦å·ï¼Œæ˜¯ç®¡é“çº¿æœ«ç«¯æˆ–ç®€å•å‘½ä»¤ */
 	return command(p1, p2);
 }
 
 /*
- *  ÃüÁî
+ *  å‘½ä»¤
  *	command:
  *		( cmdlist ) [ < in  ] [ > out ]
  *		word word* [ < in ] [ > out ]
@@ -525,88 +529,88 @@ int * pipeline(char **p1, char **p2)
 int * command(char **p1, char **p2)
 {
 	register char **p;
-	char **lp = NULL, **rp = NULL;
+	char **lp = NULL, **rp = NULL; 
 	int *t;
 	int n = 0, l = 0, i = 0, o = 0, c, flg = 0;
 
-	if (**p2 == ')')	/* Õâ¸öÃüÁîÊÇÔÚÔ²À¨ºÅ°üÎ§ÖĞµÄÃüÁîÁĞ±íµÄ×îºóÒ»¸öÃüÁî */
-		flg |= FPAR; /* Õâ¸öÃüÁîÒªÔÚ subshell µÄ½ø³ÌÄÚÖ´ĞĞ */
+	if(**p2 == ')')	/* è¿™ä¸ªå‘½ä»¤æ˜¯åœ¨åœ†æ‹¬å·åŒ…å›´ä¸­çš„å‘½ä»¤åˆ—è¡¨çš„æœ€åä¸€ä¸ªå‘½ä»¤ */
+		flg |= FPAR; /* è¿™ä¸ªå‘½ä»¤è¦åœ¨ subshell çš„è¿›ç¨‹å†…æ‰§è¡Œ */
 
-	for (p=p1; p!=p2; p++)
-		switch (c = **p) {
+	for(p=p1; p!=p2; p++)
+		switch(c = **p) {
 
 		case '(':
-			if (l == 0) {
-				if (lp != NULL)
+			if(l == 0) {
+				if(lp != NULL)
 					error++;
-				lp = p+1; /* ×îÍâ²ãÔ²À¨ºÅÄÚÁĞ±íµÄµÚÒ»¸ö×Ö */
+				lp = p+1; /* æœ€å¤–å±‚åœ†æ‹¬å·å†…åˆ—è¡¨çš„ç¬¬ä¸€ä¸ªå­— */
 			}
 			l++;
 			break;
 
 		case ')':
 			l--;
-			if (l == 0)
-				rp = p; /* ×îÍâ²ãÔ²À¨ºÅÄÚµÄ×îºóÒ»¸ö×ÖºóÃæµÄ')' */
+			if(l == 0)
+				rp = p; /* æœ€å¤–å±‚åœ†æ‹¬å·å†…çš„æœ€åä¸€ä¸ªå­—åé¢çš„')' */
 			break;
 
 		case '>':
 			p++;
-			if (p!=p2 && **p=='>') /*  >> ÖØ¶¨Ïò */
+			if(p!=p2 && **p=='>') /*  >> é‡å®šå‘ */
 				flg |= FCAT;
 			else
 				p--;
 		case '<':
-			if (l == 0) {
-				p++; /* ÖØ¶¨ÏòµÄÎÄ¼şÃèÊö·û */
-				if (p == p2) { /* ÖØ¶¨Ïò·ûºÅÖ®ºóÃ»ÓĞ×Ö·ûÁË */
+			if(l == 0) {
+				p++; /* é‡å®šå‘çš„æ–‡ä»¶æè¿°ç¬¦ */
+				if(p == p2) { /* é‡å®šå‘ç¬¦å·ä¹‹åæ²¡æœ‰å­—ç¬¦äº† */
 					error++;
 					p--;
 				}
-				if (any(**p, "<>(")) /* ÖØ¶¨ÏòÎÄ¼şÃû¿ªÍ·µÄ×Ö·û²»ºÏ·¨ */
+				if(any(**p, "<>("))  /* é‡å®šå‘æ–‡ä»¶åå¼€å¤´çš„å­—ç¬¦ä¸åˆæ³• */
 					error++;
-				if (c == '<') {
-					if (i != 0)
+				if(c == '<') {
+					if(i != 0)
 						error++;
-					i = (int)*p; /* ±£´æÊäÈëÖØ¶¨ÏòÎÄ¼şµÄÈ«Â·¾¶Ãû */
-				} else { /* > »ò >> */
-					if (o != 0)
+					i = (int)*p; /* ä¿å­˜è¾“å…¥é‡å®šå‘æ–‡ä»¶çš„å…¨è·¯å¾„å */
+				} else { /* > æˆ– >> */
+					if(o != 0)
 						error++;
-					o = (int)*p; /* ±£´æÊä³öÖØ¶¨ÏòÎÄ¼şµÄÈ«Â·¾¶Ãû */
+					o = (int)*p; /* ä¿å­˜è¾“å‡ºé‡å®šå‘æ–‡ä»¶çš„å…¨è·¯å¾„å */
 				}
 				break;
 			}
 
-		default:
-			if (l == 0) /* Õâ¸öÆÕÍ¨µÄ×Ö²»ÔÚÔ²À¨ºÅ°üÎ§ÄÚ */
+		default: 
+			if(l == 0) /* è¿™ä¸ªæ™®é€šçš„å­—ä¸åœ¨åœ†æ‹¬å·åŒ…å›´å†… */
 				p1[n++] = *p;
-			/* ĞÎ³É²ÎÊıÁĞ±í£¬Ç°ÒÆ¼·µôÁËÖØ¶¨Ïò·ûºÅºÍÏàÓ¦µÄÎÄ¼ş£¬²¢¼ÆÊı */
+			/* å½¢æˆå‚æ•°åˆ—è¡¨ï¼Œå‰ç§»æŒ¤æ‰äº†é‡å®šå‘ç¬¦å·å’Œç›¸åº”çš„æ–‡ä»¶ï¼Œå¹¶è®¡æ•° */
 		}
 
-	if (lp != 0) { /* ÓĞÔ²À¨ºÅ */
-		if (n != 0) /* »¹ÓĞ²»ÔÚÔ²À¨ºÅÖĞµÄÆÕÍ¨µÄ×Ö */
+	if(lp != 0) { /* æœ‰åœ†æ‹¬å· */
+		if(n != 0)  /* è¿˜æœ‰ä¸åœ¨åœ†æ‹¬å·ä¸­çš„æ™®é€šçš„å­— */
 			error++;
-		t = tree(5); /* ÓĞ DSPR ×Ö¶Î */
-		t[DTYP] = TPAR; /* ÀàĞÍÊÇ¸´ºÏÃüÁî */
+		t = tree(5); /* æœ‰ DSPR å­—æ®µ */
+		t[DTYP] = TPAR; /* ç±»å‹æ˜¯å¤åˆå‘½ä»¤ */
 		t[DSPR] = (int)cmdlist(lp, rp);
-	} else { /* ¼òµ¥ÃüÁî */
-		if (n == 0)	/* Ã»ÓĞÃüÁîÃû×Ö */
-			error++;
+	} else { /* ç®€å•å‘½ä»¤ */
+		if(n == 0)	/* æ²¡æœ‰å‘½ä»¤åå­— */
+			error++; 
 		t = tree(6);
-		/* ÔÚÓï·¨Ê÷½ÚµãÖĞÓĞ DSPR£¬DCOM ×Ö¶Î */
-		t[DTYP] = TCOM; /* ÀàĞÍÊÇ¼òµ¥ÃüÁî */
-		t[DSPR] = n; /* ×ÖÁĞ±íÔªËØÊıÄ¿ */
-		t[DCOM] = (int)p1; /* ×ÖÁĞ±í */
+		/* åœ¨è¯­æ³•æ ‘èŠ‚ç‚¹ä¸­æœ‰ DSPRï¼ŒDCOM å­—æ®µ */
+		t[DTYP] = TCOM; /* ç±»å‹æ˜¯ç®€å•å‘½ä»¤ */
+		t[DSPR] = n; /* å­—åˆ—è¡¨å…ƒç´ æ•°ç›® */
+		t[DCOM] = (int)p1; /* å­—åˆ—è¡¨ */
 	}
-	t[DFLG] = flg; /* ¸ù¾İÇé¿öÉèÖÃµÄ FPAR »ò FCAT ±êÖ¾ */
-	t[DLEF] = i; /* ÊäÈëÖØ¶¨ÏòÎÄ¼şµÄÈ«Â·¾¶Ãû */
-	t[DRIT] = o; /* Êä³öÖØ¶¨ÏòÎÄ¼şµÄÈ«Â·¾¶Ãû */
+	t[DFLG] = flg; /* æ ¹æ®æƒ…å†µè®¾ç½®çš„ FPAR æˆ– FCAT æ ‡å¿— */
+	t[DLEF] = i; /* è¾“å…¥é‡å®šå‘æ–‡ä»¶çš„å…¨è·¯å¾„å */
+	t[DRIT] = o; /* è¾“å‡ºé‡å®šå‘æ–‡ä»¶çš„å…¨è·¯å¾„å */
 	return t;
 }
 
 /*
- * ·ÖÅäÖ¸¶¨´óĞ¡µÄÊ÷½áµã
- * ±»µ÷ÓÚ cmdlist() pipeline() command()
+ * åˆ†é…æŒ‡å®šå¤§å°çš„æ ‘ç»“ç‚¹
+ * è¢«è°ƒäº cmdlist() pipeline() command()
  */
 int * tree(int n)
 {
@@ -614,7 +618,7 @@ int * tree(int n)
 
 	t = treep;
 	treep += n;
-	if (treep>treeend) { /* Óï·¨Ê÷½Úµã¿Õ¼ä²»¹» */
+	if (treep>treeend) { /* è¯­æ³•æ ‘èŠ‚ç‚¹ç©ºé—´ä¸å¤Ÿ */
 		prs("Command line overflow\n");
 		error++;
 		longjmp(jmpbuf,1);
@@ -622,185 +626,185 @@ int * tree(int n)
 	return t;
 }
 
-/*
- * ¹ÜµÀÏßÓï·¨Ê÷µÄÖ´ĞĞ£¬pf1 Á÷Èë¹ÜµÀ£¬pf2 Á÷³ö¹ÜµÀ
- * a | b | c ¹ÜµÀÏßµÄÓï·¨Ê÷£º
+/* 
+ * ç®¡é“çº¿è¯­æ³•æ ‘çš„æ‰§è¡Œï¼Œpf1 æµå…¥ç®¡é“ï¼Œpf2 æµå‡ºç®¡é“
+ * a | b | c ç®¡é“çº¿çš„è¯­æ³•æ ‘ï¼š
  *     TFIL1
  *     /   \
- *  TCOM1 TFIL2
+ *  TCOM1 TFIL2 
  *    |   /   \
  *    a TCOM2 TCOM3
  *        |     |
  *        b     c
- * Ö´ĞĞĞòÁĞ£º
+ * æ‰§è¡Œåºåˆ—ï¼š
  * execute(TFIL1, NULL, NULL);
- * execute(TOCM1, NULL, pv1);	TOCM1.TFLG: FPOU;	¸¸½ø³Ì´ò¿ª×Å pv1
+ * execute(TOCM1, NULL, pv1);	TOCM1.TFLG: FPOU;	çˆ¶è¿›ç¨‹æ‰“å¼€ç€ pv1
  * execute(TFIL2, pv1, NULL);	TFIL2.TFLG: FPIN;
- * execute(TCOM2, pv1, pv2);	TCOM2.TFLG: FPIN, FPOU;	¸¸½ø³Ì¹Ø±ÕÁË pv1, ´ò¿ª×Å pv2
- * execute(TCOM3, pv2, NULL);	TCOM3.TFLG: FPIN;	¸¸½ø³Ì¹Ø±ÕÁË pv2
+ * execute(TCOM2, pv1, pv2);	TCOM2.TFLG: FPIN, FPOU;	çˆ¶è¿›ç¨‹å…³é—­äº† pv1, æ‰“å¼€ç€ pv2
+ * execute(TCOM3, pv2, NULL);	TCOM3.TFLG: FPIN;	çˆ¶è¿›ç¨‹å…³é—­äº† pv2
  */
 void execute(int *t, int *pf1, int *pf2)
 {
 	int i, f, pv[2];
 	register int *t1;
 
-	if (t == 0)
+	if(t == 0)
 		return;
-	switch (t[DTYP]) {
-	case TLST:	/* ÃüÁîÁĞ±íÀàĞÍ */
-		f = t[DFLG];
-		if ((t1 = (int *)t[DLEF]) != NULL)
-			/* Ïò×Ó½ÚµãÏÂ´« FINT ±êÖ¾µÄµ±Ç°×´Ì¬ */
-			t1[DFLG] |= f&FINT;
+	switch(t[DTYP]) {
+	case TLST:	/* å‘½ä»¤åˆ—è¡¨ç±»å‹ */
+		f = t[DFLG];	
+		if((t1 = (int *)t[DLEF]) != NULL)
+			/* å‘å­èŠ‚ç‚¹ä¸‹ä¼  FINT æ ‡å¿—çš„å½“å‰çŠ¶æ€ */
+			t1[DFLG] |= f&FINT;	
 		execute(t1,NULL,NULL);
-		if ((t1 = (int *)t[DRIT]) != NULL)
+		if((t1 = (int *)t[DRIT]) != NULL)
 			t1[DFLG] |= f&FINT;
 		execute(t1,NULL,NULL);
 		/*
-		 * ÃüÁîÁĞ±íÎ»ÓÚ¸´ºÏÃüÁîÖĞµ±ÖĞµÄÊ±ºò£¬TLST ½Úµã
-		 * Ö»´ÓÉÏ²ã TPAR ½Úµã¼Ì³Ğ FINT ±êÖ¾¡£
+		 * å‘½ä»¤åˆ—è¡¨ä½äºå¤åˆå‘½ä»¤ä¸­å½“ä¸­çš„æ—¶å€™ï¼ŒTLST èŠ‚ç‚¹
+		 * åªä»ä¸Šå±‚ TPAR èŠ‚ç‚¹ç»§æ‰¿ FINT æ ‡å¿—ã€‚ 
 		 */
 		return;
 
-	case TFIL:	/* ¹ÜµÀÏßÀàĞÍ */
+	case TFIL:	/* ç®¡é“çº¿ç±»å‹ */
 		f = t[DFLG];
-		pipe(pv); /* ½¨Á¢¹ÜµÀ */
+		pipe(pv); /* å»ºç«‹ç®¡é“ */
 		t1 = (int *)t[DLEF];
-		/* Ïò×ó×Ó½ÚµãÏÂ´« FPIN FINT FPRS ±êÖ¾µÄµ±Ç°×´Ì¬£¬
-		 * ²¢ÉèÖÃËüµÄ FPOU ±êÖ¾  */
+		/* å‘å·¦å­èŠ‚ç‚¹ä¸‹ä¼  FPIN FINT FPRS æ ‡å¿—çš„å½“å‰çŠ¶æ€ï¼Œ
+		 * å¹¶è®¾ç½®å®ƒçš„ FPOU æ ‡å¿—  */
 		t1[DFLG] |= FPOU | (f&(FPIN|FINT|FPRS));
-		execute(t1, pf1, pv); /* ÃüÁîÊä³öÁ÷ÈëĞÂ½¨µÄ¹ÜµÀ */
+		execute(t1, pf1, pv); /* å‘½ä»¤è¾“å‡ºæµå…¥æ–°å»ºçš„ç®¡é“ */
 		t1 = (int *)t[DRIT];
-		/* ÏòÓÒ×Ó½ÚµãÏÂ´« FPOU FINT FAND FPRS ±êÖ¾µÄµ±Ç°×´Ì¬£¬
-		 * ²¢ÉèÖÃËüµÄ FPIN ±êÖ¾  */
+		/* å‘å³å­èŠ‚ç‚¹ä¸‹ä¼  FPOU FINT FAND FPRS æ ‡å¿—çš„å½“å‰çŠ¶æ€ï¼Œ
+		 * å¹¶è®¾ç½®å®ƒçš„ FPIN æ ‡å¿—  */
 		t1[DFLG] |= FPIN | (f&(FPOU|FINT|FAND|FPRS));
-		execute(t1, pv, pf2); /* ÃüÁîÊäÈëÀ´×ÔĞÂ½¨µÄ¹ÜµÀ */
+		execute(t1, pv, pf2); /* å‘½ä»¤è¾“å…¥æ¥è‡ªæ–°å»ºçš„ç®¡é“ */
 		/*
-		 * Ö»ÓĞ¹ÜµÀÏßÄ©¶ËµÄÃüÁîÄÜ´ÓÉÏ²ã½Úµã¼Ì³Ğµ½ FAND ±êÖ¾
+		 * åªæœ‰ç®¡é“çº¿æœ«ç«¯çš„å‘½ä»¤èƒ½ä»ä¸Šå±‚èŠ‚ç‚¹ç»§æ‰¿åˆ° FAND æ ‡å¿—
 		 */
 		return;
 
-	case TCOM: /* ¼òµ¥ÃüÁîÀàĞÍÈë¿Ú */
-		/* É¸Ñ¡³öÄÚÖÃÃüÁî */
+	case TCOM: /* ç®€å•å‘½ä»¤ç±»å‹å…¥å£ */
+		/* ç­›é€‰å‡ºå†…ç½®å‘½ä»¤ */
 		if (builtin(t))
 			return;
 
-	case TPAR: /* ¸´ºÏÃüÁîÀàĞÍÇĞÈëµã */
+	case TPAR: /* å¤åˆå‘½ä»¤ç±»å‹åˆ‡å…¥ç‚¹ */
 		f = t[DFLG];
 		i = 0;
-		/*
-		 * Îª¼òµ¥ÃüÁî¡¢¸´ºÏÃüÁîÕûÌåºÍ¸´ºÏÃüÁî³ı×îºóÒ»¸öÃüÁîÖ®ÍâµÄËùÓĞÃüÁî
-		 * ½¨Á¢×Ó½ø³Ì£¬¸´ºÏÃüÁî×îºóÒ»¸öÃüÁîÊ¹ÓÃÎª¸´ºÏÃüÁîÕûÌå½¨Á¢µÄ×Ó½ø³Ì
+		/* 
+		 * ä¸ºç®€å•å‘½ä»¤ã€å¤åˆå‘½ä»¤æ•´ä½“å’Œå¤åˆå‘½ä»¤é™¤æœ€åä¸€ä¸ªå‘½ä»¤ä¹‹å¤–çš„æ‰€æœ‰å‘½ä»¤
+		 * å»ºç«‹å­è¿›ç¨‹ï¼Œå¤åˆå‘½ä»¤æœ€åä¸€ä¸ªå‘½ä»¤ä½¿ç”¨ä¸ºå¤åˆå‘½ä»¤æ•´ä½“å»ºç«‹çš„å­è¿›ç¨‹
 		 */
-		if ((f&FPAR) == 0)
-			i = fork();
-		if (i == -1) { /* ½ø³Ì¸´ÖÆÊ§°Ü */
+		if((f&FPAR) == 0) 
+			i = fork(); 
+		if(i == -1) { /* è¿›ç¨‹å¤åˆ¶å¤±è´¥ */
 			err("try again");
 			return;
 		}
 		/*
-		 * ¸¸½ø³ÌÖ´ĞĞ²¿·Ö
+		 * çˆ¶è¿›ç¨‹æ‰§è¡Œéƒ¨åˆ†
 		 */
-		if (i != 0) {
-			if ((f&FPIN) != 0) { /* ×Ó½ø³ÌÓĞÁ÷Èë¹ÜµÀ */
-				/* ÔÚ¶Á¹ÜµÀµÄ×Ó½ø³ÌÃ»ÓĞ½¨Á¢Ö®Ç°£¬¸¸½ø³Ì±£³Ö´ò¿ªÕâ¸ö¹ÜµÀ
-				 * µ±¶Á¹ÜµÀµÄ×Ó½ø³ÌÒÑ¾­½¨Á¢Ö®ºó£¬¸¸½ø³Ì¹Ø±Õ¹ÜµÀ¶Á³öĞ´Èë¶Ë */
-				close(pf1[0]);
+		if(i != 0) { 
+			if((f&FPIN) != 0) { /* å­è¿›ç¨‹æœ‰æµå…¥ç®¡é“ */
+				/* åœ¨è¯»ç®¡é“çš„å­è¿›ç¨‹æ²¡æœ‰å»ºç«‹ä¹‹å‰ï¼Œçˆ¶è¿›ç¨‹ä¿æŒæ‰“å¼€è¿™ä¸ªç®¡é“
+				 * å½“è¯»ç®¡é“çš„å­è¿›ç¨‹å·²ç»å»ºç«‹ä¹‹åï¼Œçˆ¶è¿›ç¨‹å…³é—­ç®¡é“è¯»å‡ºå†™å…¥ç«¯ */
+				close(pf1[0]); 
 				close(pf1[1]);
 			}
-			if ((f&FPRS) != 0) { /* ĞèÒª´òÓ¡×Ó½ø³Ì pid */
+			if((f&FPRS) != 0) { /* éœ€è¦æ‰“å°å­è¿›ç¨‹ pid */
 				prn(i);
 				prs("\n");
 			}
-			if ((f&FAND) != 0) { /* ºóÌ¨ÃüÁî²»ĞèÒªµÈ´ı×Ó½ø³Ì */
+			if((f&FAND) != 0) { /* åå°å‘½ä»¤ä¸éœ€è¦ç­‰å¾…å­è¿›ç¨‹ */
 				exitstat = 0;
 				return;
 			}
-			if ((f&FPOU) == 0) /* ×Ó½ø³ÌÊÇÇ°Ì¨µÄ¼òµ¥ÃüÁî¡¢»ò¹ÜµÀÏßÄ©¶ËµÄÃüÁî */
-				exitstat = pwait(i); /*  µÈ´ı×Ó½ø³ÌÖÕÖ¹ */
+			if((f&FPOU) == 0) /* å­è¿›ç¨‹æ˜¯å‰å°çš„ç®€å•å‘½ä»¤ã€æˆ–ç®¡é“çº¿æœ«ç«¯çš„å‘½ä»¤ */
+				exitstat = pwait(i); /*  ç­‰å¾…å­è¿›ç¨‹ç»ˆæ­¢ */
 			return;
 		}
 		/*
-		 * ×Ó½ø³ÌÖ´ĞĞ²¿·Ö
+		 * å­è¿›ç¨‹æ‰§è¡Œéƒ¨åˆ†
 		 */
-		if (redirect(t)) /* ÖØ¶¨Ïò±ê×¼ÊäÈëÊä³ö */
+		if (redirect(t)) /* é‡å®šå‘æ ‡å‡†è¾“å…¥è¾“å‡º */
 			exit(1);
-		if ((f&FPIN) != 0) { /* ÓĞÁ÷Èë¹ÜµÀ */
+		if((f&FPIN) != 0) { /* æœ‰æµå…¥ç®¡é“ */
 			close(STDIN_FILENO);
-			/* ½ÓÈë¹ÜµÀ¶Á³ö¶Ë */
+			/* æ¥å…¥ç®¡é“è¯»å‡ºç«¯ */
 			dup(pf1[0]);
 			close(pf1[0]);
-			/* ¹Ø±Õ¹ÜµÀĞ´Èë¶Ë */
+			/* å…³é—­ç®¡é“å†™å…¥ç«¯ */
 			close(pf1[1]);
 		}
-		if ((f&FPOU) != 0) {	/* ÓĞÁ÷³ö¹ÜµÀ */
-			/* ½ÓÈë¹ÜµÀĞ´Èë¶Ë */
+		if((f&FPOU) != 0) {	/* æœ‰æµå‡ºç®¡é“ */
+			/* æ¥å…¥ç®¡é“å†™å…¥ç«¯ */
 			close(STDOUT_FILENO);
 			dup(pf2[1]);
 			close(pf2[0]);
-			/* ¹Ø±Õ¹ÜµÀ¶Á³ö¶Ë */
+			/* å…³é—­ç®¡é“è¯»å‡ºç«¯ */
 			close(pf2[1]);
 		}
-		/* ºóÌ¨½ø³ÌÃ»ÓĞ×öÖØ¶¨ÏòÆä±ê×¼ÊäÈë */
-		if ((f&FINT)!=0 && t[DLEF]==0 && (f&FPIN)==0) {
+		/* åå°è¿›ç¨‹æ²¡æœ‰åšé‡å®šå‘å…¶æ ‡å‡†è¾“å…¥ */
+		if((f&FINT)!=0 && t[DLEF]==0 && (f&FPIN)==0) {
 			close(STDIN_FILENO);
 			open("/dev/null", O_RDONLY);
 		}
-		/* ÊÇÎ´ÉèÖÃÖĞ¶ÏĞÅºÅºöÂÔ±êÖ¾µÄÇ°Ì¨ÃüÁî£¬
-		 * ²¢ÔÚ·Ç½»»¥Ä£Ê½ÏÂÒÑ¾­ÉèÖÃÖĞ¶ÏĞÅºÅ´¦Àí³ÌĞòÎªºöÂÔĞÅºÅ */
-		if ((f&FINT) == 0 && setintr) {
-			/* »Ö¸´ÖĞ¶ÏĞÅºÅ´¦Àí³ÌĞòÎªÈ±Ê¡ */
+		/* æ˜¯æœªè®¾ç½®ä¸­æ–­ä¿¡å·å¿½ç•¥æ ‡å¿—çš„å‰å°å‘½ä»¤ï¼Œ
+		 * å¹¶åœ¨éäº¤äº’æ¨¡å¼ä¸‹å·²ç»è®¾ç½®ä¸­æ–­ä¿¡å·å¤„ç†ç¨‹åºä¸ºå¿½ç•¥ä¿¡å· */
+		if((f&FINT) == 0 && setintr) {
+			/* æ¢å¤ä¸­æ–­ä¿¡å·å¤„ç†ç¨‹åºä¸ºç¼ºçœ */
 			signal(SIGINT, SIG_DFL);
 			signal(SIGQUIT, SIG_DFL);
 		}
-		/*
-		 * ¸´ºÏÃüÁîÔÚ×Ó shell ÖĞÖ´ĞĞ£¬¸¸ shell ½ÚµãÖĞµÄ FAND, FPRS ±êÖ¾Î»×÷ÓÃÓÚ
-		 * ×Ó shell ±¾ÉíµÄ½ø³Ì£¬×Ó shell ÖĞµÄ½Úµã²»¼Ì³Ğ FAND, FPRS ±êÖ¾Î»¡£
+		/* 
+		 * å¤åˆå‘½ä»¤åœ¨å­ shell ä¸­æ‰§è¡Œï¼Œçˆ¶ shell èŠ‚ç‚¹ä¸­çš„ FAND, FPRS æ ‡å¿—ä½ä½œç”¨äº
+		 * å­ shell æœ¬èº«çš„è¿›ç¨‹ï¼Œå­ shell ä¸­çš„èŠ‚ç‚¹ä¸ç»§æ‰¿ FAND, FPRS æ ‡å¿—ä½ã€‚
 		 */
-		if (t[DTYP] == TPAR) {
-			if ((t1 = (int *)t[DSPR]) != NULL)
-				/* Ïò×Ó½ÚµãÏÂ´« FINT ±êÖ¾µÄµ±Ç°×´Ì¬ */
+		if(t[DTYP] == TPAR) { 
+			if((t1 = (int *)t[DSPR]) != NULL)
+				/* å‘å­èŠ‚ç‚¹ä¸‹ä¼  FINT æ ‡å¿—çš„å½“å‰çŠ¶æ€ */
 				t1[DFLG] |= f&FINT;
 			execute(t1,NULL,NULL);
 			exit(1);
 		}
-		i=execcmd(t); /* Ö´ĞĞÃüÁî */
+		i=execcmd(t); /* æ‰§è¡Œå‘½ä»¤ */
 		exit(i);
 	}
 }
 
 /*
- * ÖØ¶¨Ïò±ê×¼ÊäÈëÊä³ö
+ * é‡å®šå‘æ ‡å‡†è¾“å…¥è¾“å‡º
  */
 int redirect(int *t)
 {
 	int i;
 	int f = t[DFLG];
-
-	if (t[DLEF] != 0) { /* ÓĞÊäÈëÖØ¶¨Ïò */
-		/* ÖØ¶¨Ïò±ê×¼ÊäÈë */
+	
+	if(t[DLEF] != 0) { /* æœ‰è¾“å…¥é‡å®šå‘ */
+		/* é‡å®šå‘æ ‡å‡†è¾“å…¥ */
 		close(STDIN_FILENO);
 		i = open((char *)t[DLEF], O_RDONLY);
-		if (i < 0) {
+		if(i < 0) {
 			prs((char *)t[DLEF]);
 			err(": cannot open");
 			return 1;
 		}
 	}
-	if (t[DRIT] != 0) { /* ÓĞÊä³öÖØ¶¨Ïò */
-		if ((f&FCAT) != 0) { /* >> ÖØ¶¨Ïò */
+	if(t[DRIT] != 0) { /* æœ‰è¾“å‡ºé‡å®šå‘ */
+		if((f&FCAT) != 0) { /* >> é‡å®šå‘ */
 			i = open((char *)t[DRIT], O_WRONLY);
-			if (i >= 0)
+			if(i >= 0)
 				lseek(i, 0, SEEK_END);
 		} else {
 			i = creat((char *)t[DRIT], 0666);
-			if (i < 0) {
+			if(i < 0) {
 				prs((char *)t[DRIT]);
 				err(": cannot create");
 				return 1;
 			}
 		}
-		/* ÖØ¶¨Ïò±ê×¼Êä³ö */
+		/* é‡å®šå‘æ ‡å‡†è¾“å‡º */
 		close(STDOUT_FILENO);
 		dup(i);
 		close(i);
@@ -809,7 +813,7 @@ int redirect(int *t)
 }
 
 /*
- * ÄÚÖÃÃüÁî´¦Àí
+ * å†…ç½®å‘½ä»¤å¤„ç†
  */
 int builtin(int *t)
 {
@@ -819,65 +823,66 @@ int builtin(int *t)
 	char **av = (char**)(t[DCOM]);
 
 	cp1 = av[0];
-	if (equal(cp1, "cd") || equal(cp1, "chdir")) {
-		if (ac == 2) { /* ÓĞÒ»¸ö²ÎÊı */
-			if (chdir(av[1]) < 0)
+	if(equal(cp1, "cd") || equal(cp1, "chdir")) {
+		if(ac == 2) { /* æœ‰ä¸€ä¸ªå‚æ•° */
+			if(chdir(av[1]) < 0)
 				err("chdir: bad directory");
 		} else
 			err("chdir: arg count");
 		return 1;
 	}
-	if (equal(cp1, "shift")) {
-		if (dolc < 1) {
+	if(equal(cp1, "shift")) {
+		if(dolc < 1) {
 			prs("shift: no args\n");
 			return 1;
 		}
-		dolv[1] = dolv[0]; /* ÃüÁîÎÄ¼şÃûÓÒÒÆÌæ´úÁËµÚÒ»¸öÎ»ÖÃ²ÎÊı */
+		dolv[1] = dolv[0]; /* å‘½ä»¤æ–‡ä»¶åå³ç§»æ›¿ä»£äº†ç¬¬ä¸€ä¸ªä½ç½®å‚æ•° */
 		dolv++;
 		dolc--;
 		return 1;
 	}
-	if (equal(cp1, "login")) {
-		if (promp != 0) {
+	if(equal(cp1, "login")) {
+		if(promp != 0) {
 			av[ac] = NULL;
 			execv("/bin/login", av);
 		}
 		prs("login: cannot execute\n");
 		return 1;
 	}
-	if (equal(cp1, "newgrp")) {
-		if (promp != 0) {
+	if(equal(cp1, "newgrp")) {
+		if(promp != 0) {
 			av[ac] = NULL;
 			execv("/bin/newgrp", av);
 		}
 		prs("newgrp: cannot execute\n");
 		return 1;
 	}
-	if (equal(cp1, "wait")) {
-		pwait(-1);	/* µÈ´ıËùÓĞ×Ó½ø³Ì */
+	if(equal(cp1, "wait")) {
+		pwait(-1);	/* ç­‰å¾…æ‰€æœ‰å­è¿›ç¨‹ */
 		return 1;
 	}
-	if (equal(cp1, ":"))
+	if(equal(cp1, ":"))
 		return 1;
-	if (equal(cp1, "exit")) {
-		if (ac == 2) { /* ÓĞÒ»¸ö²ÎÊı */
+	if(equal(cp1, "exit")) {
+		if (ac == 2) { /* æœ‰ä¸€ä¸ªå‚æ•° */
 			cp2 = av[1];
 			while ((c = *cp2++) >= '0' && c <= '9')
 				i = (i*10)+c-'0';
-		} else if (ac > 2) {
+		}
+		else if (ac > 2) {
 			err("exit: arg count");
 			return 1;
 		}
-		if (promp == 0)
+		if(promp == 0) 
 			lseek(STDIN_FILENO, 0, SEEK_END);
 		exit(i);
 	}
-	if (equal(cp1,"exec")) {
-		if (redirect(t)) {	/* ÖØ¶¨Ïò±ê×¼ÊäÈëÊä³ö */
+	if(equal(cp1,"exec")) {
+		if (redirect(t)) {	/* é‡å®šå‘æ ‡å‡†è¾“å…¥è¾“å‡º */
 			exitstat = 1;
 			return 1;
 		}
-		if (ac > 1) { /* ÓĞ²ÎÊı */
+		if (ac > 1) { /* æœ‰å‚æ•° */
 			t[DSPR] = ac-1;
 			t[DCOM] = (int)(av+1);
 			exitstat=execcmd(t);
@@ -886,13 +891,14 @@ int builtin(int *t)
 		exitstat = 0;
 		return 1;
 	}
-	if (equal(cp1, "umask"))	{
-		if (ac == 2) { /* ÓĞÒ»¸ö²ÎÊı */
+	if(equal(cp1, "umask"))	{
+		if (ac == 2) { /* æœ‰ä¸€ä¸ªå‚æ•° */
 			cp2 = av[1];
 			while ((c = *cp2++) >= '0' && c <= '7')
 				i = (i<<3)+c-'0';
 			umask(i);
-		} else if (ac > 2)
+		}
+		else if (ac > 2) 
 			err("umask: arg count");
 		else {
 			umask(i = umask(0));
@@ -906,80 +912,80 @@ int builtin(int *t)
 	return 0;
 }
 
-/*
- * Ö´ĞĞÓï·¨Ê÷½ÚµãÖĞµÄÃüÁî, ´øÓĞÎÄ¼şÃûÕ¹¿ª
- * ±»µ÷ÓÚ execute() builtin()
- * µ÷ÓÃ glob() texec()
+/* 
+ * æ‰§è¡Œè¯­æ³•æ ‘èŠ‚ç‚¹ä¸­çš„å‘½ä»¤, å¸¦æœ‰æ–‡ä»¶åå±•å¼€
+ * è¢«è°ƒäº execute() builtin()
+ * è°ƒç”¨ glob() texec()
  */
 int execcmd(int *t)
 {
-	int ac = t[DSPR];
+	int ac = t[DSPR];	
 	char **av = (char**)(t[DCOM]);
 
-	av[ac] = NULL; /* ÖÕ½á×ÖÁĞ±í */
+	av[ac] = NULL; /* ç»ˆç»“å­—åˆ—è¡¨ */
 	gflg = 0;
-	scan(av, tglob);	/* ²âÊÔ²ÎÊıÊÇ·ñÓĞÍ¨Åä·û */
-	if (gflg) {
+	scan(av, tglob);	/* æµ‹è¯•å‚æ•°æ˜¯å¦æœ‰é€šé…ç¬¦ */
+	if(gflg) {
 		av[-1]="/etc/glob";
 		return glob(ac+1, av-1);
 	}
-	scan(av, trim); /* Çå³ıÒıÓÃ±êÖ¾Î» */
+	scan(av, trim); /* æ¸…é™¤å¼•ç”¨æ ‡å¿—ä½ */
 	return texec(av[0], av);
 }
 
 /*
- * exec ºÍ½øĞĞ´íÎóÏûÏ¢´òÓ¡
- * ±»µ÷ÓÚ execcmd() glob()
+ * exec å’Œè¿›è¡Œé”™è¯¯æ¶ˆæ¯æ‰“å°
+ * è¢«è°ƒäº execcmd() glob()
  */
 int texec(char* f, char **t)
 {
 	extern int errno;
 
-	/* ÓÉÓÚ²»ÉèÖÃ½ø³ÌµÄ»·¾³£¬¿É·½±ãµÄÊ¹ÓÃ execvp() ¶ø²»ÓÃ execve() */
+	/* ç”±äºä¸è®¾ç½®è¿›ç¨‹çš„ç¯å¢ƒï¼Œå¯æ–¹ä¾¿çš„ä½¿ç”¨ execvp() è€Œä¸ç”¨ execve() */
 	execvp(f, t);
-	if (errno==EACCES) { /* Ã»ÓĞ·ÃÎÊÈ¨ÏŞ */
+	if (errno==EACCES) { /* æ²¡æœ‰è®¿é—®æƒé™ */
 		prs(t[0]);
 		err(": permission denied");
 	}
-	if (errno==ENOEXEC) { /* ²»ÊÇ¶ş½øÖÆ¿ÉÖ´ĞĞÎÄ¼ş */
+	if (errno==ENOEXEC) { /* ä¸æ˜¯äºŒè¿›åˆ¶å¯æ‰§è¡Œæ–‡ä»¶ */
 		prs("No shell!\n");
 	}
-	if (errno==ENOMEM) { /* ²»ÄÜ·ÖÅäÄÚ´æ */
+	if (errno==ENOMEM) { /* ä¸èƒ½åˆ†é…å†…å­˜ */
 		prs(t[0]);
 		err(": too large");
 	}
 	if (errno==ENOENT) {
 		prs(t[0]);
 		err(": not found");
-		return 127; /* Ö¸Ê¾Ã»ÓĞÕÒµ½ÎÄ¼ş */
+		return 127; /* æŒ‡ç¤ºæ²¡æœ‰æ‰¾åˆ°æ–‡ä»¶ */
 	}
 	return 126;
 }
 
 /*
- * É¨Ãè×ÖÁĞ±í
+ * æ‰«æå­—åˆ—è¡¨
  */
 void scan(char **t, int (*f)())
 {
 	register char *p, c;
 
-	while ((p = *t++) != NULL)
-		while ((c = *p) != 0)
+	while((p = *t++) != NULL)
+		while((c = *p) != 0)
 			*p++ = (*f)(c);
 }
 
 /*
- * ¼ì²âÊÇ·ñ°üº¬Í¨Åä·û
+ * æ£€æµ‹æ˜¯å¦åŒ…å«é€šé…ç¬¦
  */
 int tglob(int c)
 {
-	if (any(c, "[?*"))
+	if(any(c, "[?*"))
 		gflg = 1;
 	return c;
 }
 
 /*
- * Çå³ıÒıÓÃ±êÖ¾Î»
+ * æ¸…é™¤å¼•ç”¨æ ‡å¿—ä½
  */
 int trim(int c)
 {
@@ -987,32 +993,32 @@ int trim(int c)
 }
 
 /*
- * ´òÓ¡´íÎóÊä³ö£¬ÔÚ·Ç½»»¥Ä£Ê½ÏÂÍË³ö
+ * æ‰“å°é”™è¯¯è¾“å‡ºï¼Œåœ¨éäº¤äº’æ¨¡å¼ä¸‹é€€å‡º
  */
 void err(char *s)
 {
 	prs(s);
 	prs("\n");
-	if (promp == 0) {
+	if(promp == 0) {
 		lseek(STDIN_FILENO, 0, SEEK_END);
 		exit(1);
 	}
 }
 
 /*
- * Ğ´Ò»¸ö×Ö·û´®
+ * å†™ä¸€ä¸ªå­—ç¬¦ä¸²
  */
 void prs(char *as)
 {
 	register char *s;
 
 	s = as;
-	while (*s)
+	while(*s)
 		prc(*s++);
 }
 
 /*
- * Ğ´Ò»¸ö×Ö·û
+ * å†™ä¸€ä¸ªå­—ç¬¦
  */
 void prc(int c)
 {
@@ -1020,45 +1026,45 @@ void prc(int c)
 }
 
 /*
- * Ğ´Ò»¸öÊı
+ * å†™ä¸€ä¸ªæ•°
  */
 void prn(int n)
 {
 	register int a;
 
-	if ((a=n/10) != 0)
+	if((a=n/10) != 0)
 		prn(a);
 	prc((n%10)+'0');
 }
 
 /*
- * Ğ´Ò»¸öÊıµ½×Ö·û´®
+ * å†™ä¸€ä¸ªæ•°åˆ°å­—ç¬¦ä¸²
  */
 void sprn(int n, char *s)
 {
 	int i,j;
-	for (i=1000000000; n<i && i>1; i/=10); /* 32 Î»×Ö³¤ */
+	for (i=1000000000; n<i && i>1; i/=10); /* 32 ä½å­—é•¿ */
 	for (j=0; i>0; j++,n%=i,i/=10)
 		s[j] =(char)(n/i + '0');
 	s[j] = '\0';
 }
 
 /*
- * ÅĞ¶ÏÒ»¸ö×Ö·ûÊÇ·ñÔÚÒ»¸ö×Ö·û´®ÖĞ£¬×Ö·û'\0'´æÔÚÓÚÈÎºÎ×Ö·û´®ÖĞ
+ * åˆ¤æ–­ä¸€ä¸ªå­—ç¬¦æ˜¯å¦åœ¨ä¸€ä¸ªå­—ç¬¦ä¸²ä¸­ï¼Œå­—ç¬¦'\0'å­˜åœ¨äºä»»ä½•å­—ç¬¦ä¸²ä¸­
  */
 int any(int c, char *as)
 {
 	register char *s;
 
 	s = as;
-	while (*s)
-		if (*s++ == c)
+	while(*s)
+		if(*s++ == c)
 			return 1;
 	return 0;
 }
 
 /*
- * ÅĞ¶ÏÁ½¸ö×Ö·û´®ÊÇ·ñÏàµÈ
+ * åˆ¤æ–­ä¸¤ä¸ªå­—ç¬¦ä¸²æ˜¯å¦ç›¸ç­‰
  */
 int equal(char *as1, char *as2)
 {
@@ -1066,30 +1072,30 @@ int equal(char *as1, char *as2)
 
 	s1 = as1;
 	s2 = as2;
-	while (*s1++ == *s2)
-		if (*s2++ == '\0')
+	while(*s1++ == *s2)
+		if(*s2++ == '\0')
 			return 1;
 	return 0;
 }
 
 /*
- * i>0 µÈ´ıÖ¸¶¨ pid µÄ½ø³ÌÖÕÖ¹£¬i<0 µÈ´ıËùÓĞ×Ó½ø³ÌÖÕÖ¹£¬
- * Èç¹ûÒì³£ÖÕÖ¹£¬Ôò´òÓ¡Õï¶ÏĞÅÏ¢
+ * i>0 ç­‰å¾…æŒ‡å®š pid çš„è¿›ç¨‹ç»ˆæ­¢ï¼Œi<0 ç­‰å¾…æ‰€æœ‰å­è¿›ç¨‹ç»ˆæ­¢ï¼Œ
+ * å¦‚æœå¼‚å¸¸ç»ˆæ­¢ï¼Œåˆ™æ‰“å°è¯Šæ–­ä¿¡æ¯
  */
 int pwait(pid_t i)
 {
 	pid_t p;
 	int e = 0, s;
 
-	if (i == 0)
+	if(i == 0)
 		return 0;
-	for (;;) {
+	for(;;) {
 		p = wait(&s);
-		if (p == -1) /* Ã»ÓĞ×Ó½ø³ÌĞèÒªµÈ´ıÁË */
+		if(p == -1) /* æ²¡æœ‰å­è¿›ç¨‹éœ€è¦ç­‰å¾…äº† */
 			break;
-		e = WTERMSIG(s); /* È¡×Ó½ø³ÌÖÕÖ¹×´Ì¬ */
-		if (e >= NSIGMSG || mesg[e] != NULL) { /*±»ĞÅºÅÖÕÖ¹²¢ÓĞÏàÓ¦µÄÕï¶ÏÏûÏ¢*/
-			if (p != i) {
+		e = WTERMSIG(s); /* å–å­è¿›ç¨‹ç»ˆæ­¢çŠ¶æ€ */
+		if(e >= NSIGMSG || mesg[e] != NULL) { /*è¢«ä¿¡å·ç»ˆæ­¢å¹¶æœ‰ç›¸åº”çš„è¯Šæ–­æ¶ˆæ¯*/
+			if(p != i) {
 				prn(p);
 				prs(": ");
 			}
@@ -1099,15 +1105,15 @@ int pwait(pid_t i)
 				prs("Signal ");
 				prn(e);
 			}
-			/*	if(WCOREDUMP(s))
-			 *		prs(" -- Core dumped"); */
+		/*	if(WCOREDUMP(s))
+		 *		prs(" -- Core dumped"); */
 			err("");
 		}
-		if (i == p) /* ÖÕÖ¹µÄ×Ó½ø³ÌÊÇÒªµÈ´ıµÄ×Ó½ø³Ì */
+		if(i == p) /* ç»ˆæ­¢çš„å­è¿›ç¨‹æ˜¯è¦ç­‰å¾…çš„å­è¿›ç¨‹ */
 			break;
 	}
 	if (WIFEXITED(s))
 		return WEXITSTATUS(s);
 	else
-		return e | 0x80; /* Òì³£ÖÕÖ¹·µ»Ø´óÓÚ 128 µÄ 8 Î»ÕûÊı */
+		return e | 0x80; /* å¼‚å¸¸ç»ˆæ­¢è¿”å›å¤§äº 128 çš„ 8 ä½æ•´æ•° */ 
 }
